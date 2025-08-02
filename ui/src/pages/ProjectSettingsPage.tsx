@@ -38,7 +38,7 @@ export default function ProjectSettingsPage() {
   return (
     <>
       <AppHeader />
-      <div className="container py-4">
+      <div className="container py-4" style={{ paddingTop: '88px' }}>
         <h2 className="mb-4 text-start">Project settings: {projectId}</h2>
         {/* General section */}
         <div className="mb-4 text-start">

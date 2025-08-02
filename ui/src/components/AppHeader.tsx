@@ -1,37 +1,30 @@
 import React from 'react';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 export default function AppHeader() {
   return (
-    <header className="p-3 border-bottom w-100 fixed-top bg-white" style={{ zIndex: 1030 }}>
+    <header className="p-3 border-bottom w-100 bg-white" style={{ marginBottom: '10px' }}>
       <div className="container-fluid">
         <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-          <a href="/" className="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
-            {/* Remplacer le SVG par une icône Bootstrap ou autre si besoin */}
-            <svg className="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap">
-              <use xlinkHref="#bootstrap" />
-            </svg>
-          </a>
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-            <li><a href="#" className="nav-link px-2 link-secondary">Overview</a></li>
-            <li><a href="#" className="nav-link px-2 link-body-emphasis">Inventory</a></li>
-            <li><a href="#" className="nav-link px-2 link-body-emphasis">Customers</a></li>
-            <li><a href="#" className="nav-link px-2 link-body-emphasis">Products</a></li>
+            <li><a href="/projects" className="nav-link px-2 link-body-emphasis">Projects</a></li>
           </ul>
-          <form className="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
-            <input type="search" className="form-control" placeholder="Search..." aria-label="Search" />
-          </form>
-          <div className="dropdown text-end">
-            <a href="#" className="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" className="rounded-circle" />
-            </a>
-            <ul className="dropdown-menu text-small">
-              <li><a className="dropdown-item" href="#">New project...</a></li>
-              <li><a className="dropdown-item" href="#">Settings</a></li>
-              <li><a className="dropdown-item" href="#">Profile</a></li>
-              <li><hr className="dropdown-divider" /></li>
-              <li><a className="dropdown-item" href="#">Sign out</a></li>
-            </ul>
-          </div>
+          <Dropdown align="end">
+            <Dropdown.Toggle variant="link" className="d-block link-body-emphasis text-decoration-none p-0 border-0" id="dropdown-user">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" className="bi bi-person-circle" viewBox="0 0 16 16">
+                <path d="M13.468 12.37C12.758 11.226 11.383 10.5 8 10.5c-3.383 0-4.758.726-5.468 1.87A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"/>
+                <path fillRule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                <path fillRule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"/>
+              </svg>
+            </Dropdown.Toggle>
+            <Dropdown.Menu className="text-small">
+              <Dropdown.Item href="#">New project...</Dropdown.Item>
+              <Dropdown.Item href="#">Settings</Dropdown.Item>
+              <Dropdown.Item href="#">Profile</Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item href="#">Sign out</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
         </div>
       </div>
     </header>

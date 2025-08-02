@@ -28,7 +28,7 @@ export default function TableContentPage() {
   return (
     <>
       <AppHeader />
-      <div className="container py-4">
+      <div className="container py-4" style={{ paddingTop: '88px' }}>
         <h2>Table content {tableId} (project {projectId})</h2>
         <div className="mb-3">
           <details>

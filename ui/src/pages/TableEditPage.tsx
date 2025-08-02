@@ -8,7 +8,7 @@ export default function TableEditPage() {
   return (
     <>
       <AppHeader />
-      <div className="container py-4">
+      <div className="container py-4" style={{ paddingTop: '88px' }}>
         <h2>{tableId ? `Édition de la table ${tableId}` : "Ajout d'une nouvelle table"}</h2>
         <div className="alert alert-info">(Formulaire d'édition/ajout à implémenter ici)</div>
       </div>

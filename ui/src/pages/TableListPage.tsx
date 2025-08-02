@@ -17,7 +17,7 @@ export default function TableListPage() {
   return (
     <>
       <AppHeader />
-      <div className="container py-4">
+      <div className="container-fluid py-4">
         <div className="d-flex align-items-center justify-content-between mb-4">
           <h2 className="mb-0">Tables of project {projectId}</h2>
           <div>

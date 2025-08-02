@@ -22,7 +22,7 @@ export default function ProjectListPage() {
   return (
     <>
       <AppHeader />
-      <div className="container-fluid" style={{ marginTop: '72px' }}>
+      <div className="container-fluid">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h2>Projects</h2>
           <button className="btn btn-primary">Create</button>
