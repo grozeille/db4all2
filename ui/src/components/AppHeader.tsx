@@ -1,5 +1,8 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { getProject } from '../services/projectApi';
+import { getTable } from '../services/tableApi';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import Dropdown from 'react-bootstrap/Dropdown';
 
@@ -14,7 +17,24 @@ export default function AppHeader() {
 
   // Breadcrumb dynamique
   const location = useLocation();
+  const params = useParams();
   const pathnames = location.pathname.split('/').filter(Boolean);
+  const [projectName, setProjectName] = useState<string | null>(null);
+  const [tableName, setTableName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (params.projectId) {
+      getProject(params.projectId).then(p => setProjectName(p.name)).catch(() => setProjectName(null));
+    } else {
+      setProjectName(null);
+    }
+    if (params.projectId && params.tableId) {
+      getTable(params.projectId, params.tableId).then(t => setTableName(t.name)).catch(() => setTableName(null));
+    } else {
+      setTableName(null);
+    }
+  }, [params.projectId, params.tableId]);
+
   const crumbs = [
     { name: 'Projects', href: '/projects' }
   ];
@@ -24,7 +44,7 @@ export default function AppHeader() {
     }
     else if (pathnames[1]) {
         // inside a project
-        crumbs.push({ name: `${pathnames[1]}`, href: `/projects/${pathnames[1]}/tables` });
+        crumbs.push({ name: projectName || params.projectId, href: `/projects/${params.projectId}/tables` });
 
         if (pathnames[2] == 'settings') {
             crumbs.push({ name: 'Settings', href: location.pathname });
@@ -35,7 +55,7 @@ export default function AppHeader() {
             }
             else if (pathnames[3]) {
                 // inside a table
-                crumbs.push({ name: `${pathnames[3]}`, href: `/projects/${pathnames[1]}/tables/${pathnames[3]}` });
+                crumbs.push({ name: tableName || params.tableId, href: `/projects/${params.projectId}/tables/${params.tableId}` });
 
                 if (pathnames[4] == 'settings') {
                     crumbs.push({ name: 'Settings', href: location.pathname });

@@ -34,7 +34,7 @@ export default function ProjectListPage() {
       <div className="row g-3">
         {paged.map((p: Project) => (
           <div className="col-md-4" key={p.id}>
-            <div className="card h-100" style={{ cursor: 'pointer' }} onClick={() => navigate(`/projects/${p.id}/tables`)}>
+            <div className="card h-100" style={{ cursor: 'pointer' }} onClick={() => navigate(`/projects/${p.id}/tables`, { state: { projectName: p.name } })}>
               <div className="card-body">
                 <h5 className="card-title">{p.name.length > 10 ? p.name.slice(0, 10) + '...' : p.name}</h5>
                 <p className="card-text text-muted">{p.description.length > 120 ? p.description.slice(0, 120) + '...' : p.description}</p>
