@@ -1,14 +1,64 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 export default function AppHeader() {
+  // Style global pour le breadcrumb dans le header
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = '.app-header-breadcrumb .breadcrumb { margin-bottom: 0 !important; }';
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
+  // Breadcrumb dynamique
+  const location = useLocation();
+  const pathnames = location.pathname.split('/').filter(Boolean);
+  const crumbs = [
+    { name: 'Projects', href: '/projects' }
+  ];
+  if (pathnames.length > 1) {
+    if (pathnames[1] === 'new') {
+      crumbs.push({ name: 'New project', href: location.pathname });
+    }
+    else if (pathnames[1]) {
+        // inside a project
+        crumbs.push({ name: `${pathnames[1]}`, href: `/projects/${pathnames[1]}/tables` });
+
+        if (pathnames[2] == 'settings') {
+            crumbs.push({ name: 'Settings', href: location.pathname });
+        }
+        else if (pathnames[2] == 'tables') {
+            if (pathnames[3] == 'new') {
+                crumbs.push({ name: 'New table', href: location.pathname });
+            }
+            else if (pathnames[3]) {
+                // inside a table
+                crumbs.push({ name: `${pathnames[3]}`, href: `/projects/${pathnames[1]}/tables/${pathnames[3]}` });
+
+                if (pathnames[4] == 'settings') {
+                    crumbs.push({ name: 'Settings', href: location.pathname });
+                }
+            }
+        }
+    }
+  }
   return (
-    <header className="p-3 border-bottom w-100 bg-white" style={{ marginBottom: '10px' }}>
+    <header className="p-3 border-bottom w-100 bg-white">
       <div className="container-fluid">
-        <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-          <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-            <li><a href="/projects" className="nav-link px-2 link-body-emphasis">Projects</a></li>
-          </ul>
+        <div className="d-flex flex-wrap align-items-center justify-content-between">
+          <div className="d-flex align-items-center gap-3 app-header-breadcrumb">
+            <Breadcrumb className="mb-0 align-items-center d-flex mb-0">
+              {crumbs.map((crumb, idx) => (
+                idx < crumbs.length - 1 ? (
+                  <Breadcrumb.Item key={idx} href={crumb.href}>{crumb.name}</Breadcrumb.Item>
+                ) : (
+                  <Breadcrumb.Item key={idx} active>{crumb.name}</Breadcrumb.Item>
+                )
+              ))}
+            </Breadcrumb>
+          </div>
           <Dropdown align="end">
             <Dropdown.Toggle variant="link" className="d-block link-body-emphasis text-decoration-none p-0 border-0" id="dropdown-user">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" className="bi bi-person-circle" viewBox="0 0 16 16">
@@ -18,9 +68,8 @@ export default function AppHeader() {
               </svg>
             </Dropdown.Toggle>
             <Dropdown.Menu className="text-small">
-              <Dropdown.Item href="#">New project...</Dropdown.Item>
-              <Dropdown.Item href="#">Settings</Dropdown.Item>
               <Dropdown.Item href="#">Profile</Dropdown.Item>
+              <Dropdown.Item href="#">Admin.</Dropdown.Item>
               <Dropdown.Divider />
               <Dropdown.Item href="#">Sign out</Dropdown.Item>
             </Dropdown.Menu>

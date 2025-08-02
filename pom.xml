@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+    <groupId>fr.grozeille</groupId>
+    <artifactId>db4all</artifactId>
+	<version>2.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>db4all</name>
+	<description>DB4ALL</description>
+    
+    <scm>
+        <connection>scm:git:https://github.com/grozeille/db4all2.git</connection>
+    </scm>
+
+    <issueManagement>
+        <url>https://github.com/grozeille/db4all2/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>Apache License v2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <email>mathias.kluba@gmail.com</email>
+            <name>Mathias Kluba</name>
+            <url>https://github.com/grozeille</url>
+            <id>grozeille</id>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>api</module>
+    </modules>
+    
+</project>

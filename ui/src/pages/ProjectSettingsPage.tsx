@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import AppHeader from '../components/AppHeader';
+import PageLayout from '../components/PageLayout';
 import { useParams } from 'react-router-dom';
 
 // Fake data
@@ -36,89 +36,86 @@ export default function ProjectSettingsPage() {
   };
 
   return (
-    <>
-      <AppHeader />
-      <div className="container py-4" style={{ paddingTop: '88px' }}>
-        <h2 className="mb-4 text-start">Project settings: {projectId}</h2>
-        {/* General section */}
-        <div className="mb-4 text-start">
-          <h4 className="mb-3">General</h4>
-          <div className="mb-3">
-            <label className="form-label">Name</label>
-            <input className="form-control" value={name} onChange={e => setName(e.target.value)} />
-            {error && <div className="text-danger mt-1">{error}</div>}
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Description</label>
-            <textarea className="form-control" value={description} onChange={e => setDescription(e.target.value)} />
-          </div>
-          <button className="btn btn-success" onClick={handleSave}>Save</button>
+    <PageLayout>
+      <h2 className="mb-4 text-start">Project settings: {projectId}</h2>
+      {/* General section */}
+      <div className="mb-4 text-start">
+        <h4 className="mb-3">General</h4>
+        <div className="mb-3">
+          <label className="form-label">Name</label>
+          <input className="form-control" value={name} onChange={e => setName(e.target.value)} />
+          {error && <div className="text-danger mt-1">{error}</div>}
         </div>
-        {/* Permissions section */}
-        <div className="mb-4 text-start">
-          <h4 className="mb-3">Permissions</h4>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Role</th>
-                <th></th>
+        <div className="mb-3">
+          <label className="form-label">Description</label>
+          <textarea className="form-control" value={description} onChange={e => setDescription(e.target.value)} />
+        </div>
+        <button className="btn btn-success" onClick={handleSave}>Save</button>
+      </div>
+      {/* Permissions section */}
+      <div className="mb-4 text-start">
+        <h4 className="mb-3">Permissions</h4>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {members.map(m => (
+              <tr key={m.id}>
+                <td>{m.name}{m.self && <span className="ms-2 badge bg-primary">You</span>}</td>
+                <td>{m.role}</td>
+                <td>
+                  <button className="btn btn-secondary btn-sm me-2">Edit</button>
+                  <button className="btn btn-danger btn-sm">Remove</button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {members.map(m => (
-                <tr key={m.id}>
-                  <td>{m.name}{m.self && <span className="ms-2 badge bg-primary">You</span>}</td>
-                  <td>{m.role}</td>
-                  <td>
-                    <button className="btn btn-secondary btn-sm me-2">Edit</button>
-                    <button className="btn btn-danger btn-sm">Remove</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button className="btn btn-primary">Add user</button>
-        </div>
-        {/* Data sources section */}
-        <div className="mb-4 text-start">
-          <h4 className="mb-3">Data sources</h4>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Read-only</th>
-                <th></th>
+            ))}
+          </tbody>
+        </table>
+        <button className="btn btn-primary">Add user</button>
+      </div>
+      {/* Data sources section */}
+      <div className="mb-4 text-start">
+        <h4 className="mb-3">Data sources</h4>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Read-only</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {datasources.map(ds => (
+              <tr key={ds.id}>
+                <td>{ds.name}</td>
+                <td>{ds.type}</td>
+                <td>{ds.readonly ? 'Yes' : 'No'}</td>
+                <td>
+                  <button className="btn btn-secondary btn-sm me-2">Configure</button>
+                  <button className="btn btn-danger btn-sm">Remove</button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {datasources.map(ds => (
-                <tr key={ds.id}>
-                  <td>{ds.name}</td>
-                  <td>{ds.type}</td>
-                  <td>{ds.readonly ? 'Yes' : 'No'}</td>
-                  <td>
-                    <button className="btn btn-secondary btn-sm me-2">Configure</button>
-                    <button className="btn btn-danger btn-sm">Remove</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button className="btn btn-primary">Add data source</button>
-        </div>
-        {/* Danger zone section */}
-        <div className="border rounded p-3 text-start" style={{ borderColor: 'red' }}>
-          <h4 className="text-danger mb-3">Danger zone</h4>
-          <button className="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete project</button>
-          <div className="mt-2">
-            <label className="form-label">Type the project name to confirm:</label>
-            <input className="form-control" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} />
-            <button className="btn btn-danger mt-2" disabled={deleteConfirm !== name} onClick={handleDelete}>Confirm delete</button>
-          </div>
+            ))}
+          </tbody>
+        </table>
+        <button className="btn btn-primary">Add data source</button>
+      </div>
+      {/* Danger zone section */}
+      <div className="border rounded p-3 text-start" style={{ borderColor: 'red' }}>
+        <h4 className="text-danger mb-3">Danger zone</h4>
+        <button className="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete project</button>
+        <div className="mt-2">
+          <label className="form-label">Type the project name to confirm:</label>
+          <input className="form-control" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} />
+          <button className="btn btn-danger mt-2" disabled={deleteConfirm !== name} onClick={handleDelete}>Confirm delete</button>
         </div>
       </div>
-    </>
+    </PageLayout>
   );
 }

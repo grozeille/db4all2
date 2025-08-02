@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ProjectListPage from './pages/ProjectListPage';
+import ProjectCreatePage from './pages/ProjectCreatePage';
 import ProjectSettingsPage from './pages/ProjectSettingsPage';
 import TableListPage from './pages/TableListPage';
 import TableContentPage from './pages/TableContentPage';
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<ProjectListPage />} />
         <Route path="/projects" element={<ProjectListPage />} />
+        <Route path="/projects/new" element={<ProjectCreatePage />} />
         <Route path="/projects/:projectId/settings" element={<ProjectSettingsPage />} />
         <Route path="/projects/:projectId/tables" element={<TableListPage />} />
         <Route path="/projects/:projectId/tables/new" element={<TableEditPage />} />

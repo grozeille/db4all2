@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import AppHeader from '../components/AppHeader';
+import PageLayout from '../components/PageLayout';
 import { useParams } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
@@ -26,28 +26,25 @@ export default function TableContentPage() {
   const [filterGroup, setFilterGroup] = useState<QueryGroup>({ operator: 'AND', rules: [] });
 
   return (
-    <>
-      <AppHeader />
-      <div className="container py-4" style={{ paddingTop: '88px' }}>
-        <h2>Table content {tableId} (project {projectId})</h2>
-        <div className="mb-3">
-          <details>
-            <summary className="mb-2"><b>Filter</b></summary>
-            <QueryBuilder group={filterGroup} fields={FIELDS} onChange={setFilterGroup} />
-          </details>
-        </div>
-        <div className="ag-theme-alpine" style={{ height: 400, width: '100%' }}>
-          <AgGridReact
-            rowData={FAKE_DATA}
-            columnDefs={[
-              { headerName: 'Column 1', field: 'col1' },
-              { headerName: 'Column 2', field: 'col2' },
-              { headerName: 'Column 3', field: 'col3' },
-            ]}
-            domLayout="autoHeight"
-          />
-        </div>
+    <PageLayout>
+      <h2>Table content {tableId} (project {projectId})</h2>
+      <div className="mb-3">
+        <details>
+          <summary className="mb-2"><b>Filter</b></summary>
+          <QueryBuilder group={filterGroup} fields={FIELDS} onChange={setFilterGroup} />
+        </details>
       </div>
-    </>
+      <div className="ag-theme-alpine" style={{ height: 400, width: '100%' }}>
+        <AgGridReact
+          rowData={FAKE_DATA}
+          columnDefs={[
+            { headerName: 'Column 1', field: 'col1' },
+            { headerName: 'Column 2', field: 'col2' },
+            { headerName: 'Column 3', field: 'col3' },
+          ]}
+          domLayout="autoHeight"
+        />
+      </div>
+    </PageLayout>
   );
 }
