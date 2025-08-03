@@ -44,7 +44,7 @@ export default function AppHeader() {
         crumbs.push({ name: 'New project', href: location.pathname });
       } else if (pathnames[1]) {
         // Projet
-        crumbs.push({ name: projectName || params.projectId, href: `/projects/${params.projectId}/tables` });
+        crumbs.push({ name: projectName || '', href: `/projects/${params.projectId}/tables` });
         if (pathnames[2] === 'settings') {
           crumbs.push({ name: 'Settings', href: location.pathname });
         } else if (pathnames[2] === 'tables') {
@@ -52,7 +52,7 @@ export default function AppHeader() {
             crumbs.push({ name: 'New table', href: location.pathname });
           } else if (pathnames[3]) {
             // Table
-            crumbs.push({ name: tableName || params.tableId, href: `/projects/${params.projectId}/tables/${params.tableId}` });
+            crumbs.push({ name: tableName || '', href: `/projects/${params.projectId}/tables/${params.tableId}` });
             if (pathnames[4] === 'settings') {
               crumbs.push({ name: 'Settings', href: location.pathname });
             }
