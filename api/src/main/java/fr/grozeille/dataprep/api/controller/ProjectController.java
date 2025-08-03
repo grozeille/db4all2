@@ -2,6 +2,7 @@
 package fr.grozeille.dataprep.api.controller;
 
 
+import fr.grozeille.dataprep.api.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class ProjectController {
         try {
             return projectRepository.findById(id)
                     .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(404).body(new ErrorMessage("Project not found")));
+                    .orElse(ResponseEntity.status(404).body(new ErrorResponse("Project not found")));
         } catch (Exception e) {
             log.error("Erreur lors de la récupération du projet {}", id, e);
             return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
@@ -45,16 +46,16 @@ public class ProjectController {
     public ResponseEntity<?> create(@RequestBody Project project) {
         try {
             if (project.getName() == null || project.getName().isEmpty()) {
-                return ResponseEntity.badRequest().body(new ErrorMessage("Name is required"));
+                return ResponseEntity.badRequest().body(new ErrorResponse("Name is required"));
             }
             Project saved = projectRepository.save(project);
             return ResponseEntity.ok(saved);
         } catch (DataIntegrityViolationException e) {
             log.warn("Conflit lors de la création du projet: {}", project.getName());
-            return ResponseEntity.status(400).body(new ErrorMessage("Project name already exists"));
+            return ResponseEntity.status(400).body(new ErrorResponse("Project name already exists"));
         } catch (Exception e) {
             log.error("Erreur lors de la création du projet", e);
-            return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
+            return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
 
@@ -62,20 +63,20 @@ public class ProjectController {
     public ResponseEntity<?> update(@PathVariable String id, @RequestBody Project project) {
         try {
             if (!projectRepository.existsById(id)) {
-                return ResponseEntity.status(404).body(new ErrorMessage("Project not found"));
+                return ResponseEntity.status(404).body(new ErrorResponse("Project not found"));
             }
             if (project.getName() == null || project.getName().isEmpty()) {
-                return ResponseEntity.badRequest().body(new ErrorMessage("Name is required"));
+                return ResponseEntity.badRequest().body(new ErrorResponse("Name is required"));
             }
             project.setId(id);
             Project saved = projectRepository.save(project);
             return ResponseEntity.ok(saved);
         } catch (DataIntegrityViolationException e) {
             log.warn("Conflit lors de la modification du projet: {}", project.getName());
-            return ResponseEntity.status(400).body(new ErrorMessage("Project name already exists"));
+            return ResponseEntity.status(400).body(new ErrorResponse("Project name already exists"));
         } catch (Exception e) {
             log.error("Erreur lors de la modification du projet {}", id, e);
-            return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
+            return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
 
@@ -83,21 +84,14 @@ public class ProjectController {
     public ResponseEntity<?> delete(@PathVariable String id) {
         try {
             if (!projectRepository.existsById(id)) {
-                return ResponseEntity.status(404).body(new ErrorMessage("Project not found"));
+                return ResponseEntity.status(404).body(new ErrorResponse("Project not found"));
             }
             projectRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             log.error("Erreur lors de la suppression du projet {}", id, e);
-            return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
+            return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
 
-    // Classe utilitaire pour les messages d'erreur JSON
-    public static class ErrorMessage {
-        private String message;
-        public ErrorMessage(String message) { this.message = message; }
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
-    }
 }

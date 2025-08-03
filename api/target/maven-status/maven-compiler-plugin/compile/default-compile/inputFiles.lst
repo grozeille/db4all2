@@ -1,0 +1,14 @@
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/controller/AuthController.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/security/JwtUtil.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/security/JwtAuthFilter.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/config/SecurityConfig.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/controller/ProjectController.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/config/OpenApiConfig.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/entity/User.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/model/Project.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/model/Table.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/repository/TableRepository.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/controller/LoginController.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/repository/ProjectRepository.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/controller/TableController.java
+/Users/mathias/Work/projects/mk-dataprep-ui/api/src/main/java/fr/grozeille/dataprep/api/repository/UserRepository.java

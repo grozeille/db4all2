@@ -1,0 +1,9 @@
+fr/grozeille/dataprep/api/controller/AuthController.class
+fr/grozeille/dataprep/api/repository/UserRepository.class
+fr/grozeille/dataprep/api/entity/User.class
+fr/grozeille/dataprep/api/config/OpenApiConfig.class
+fr/grozeille/dataprep/api/security/JwtAuthFilter.class
+fr/grozeille/dataprep/api/controller/AuthController$ErrorResponse.class
+fr/grozeille/dataprep/api/controller/AuthController$1.class
+fr/grozeille/dataprep/api/security/JwtUtil.class
+fr/grozeille/dataprep/api/controller/AuthController$InitRequest.class

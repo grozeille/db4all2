@@ -2,6 +2,7 @@
 package fr.grozeille.dataprep.api.controller;
 
 
+import fr.grozeille.dataprep.api.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +53,7 @@ public class TableController {
             return ResponseEntity.ok(saved);
         } catch (DataIntegrityViolationException e) {
             log.warn("Conflit lors de la création de la table: {}", table.getName());
-            return ResponseEntity.status(400).body(new ErrorMessage("Table name already exists"));
+            return ResponseEntity.status(400).body(new ErrorResponse("Table name already exists"));
         } catch (Exception e) {
             log.error("Erreur lors de la création de la table", e);
             return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
@@ -77,24 +78,21 @@ public class TableController {
             return ResponseEntity.status(400).body(new ErrorMessage("Table name already exists"));
         } catch (Exception e) {
             log.error("Erreur lors de la modification de la table {} du projet {}", tableId, projectId, e);
-            return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
+            return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
 
-import lombok.extern.slf4j.Slf4j;
     @DeleteMapping("/{tableId}")
     public ResponseEntity<?> delete(@PathVariable String projectId, @PathVariable String tableId) {
         try {
-@Slf4j
             if (!tableRepository.existsByIdAndProjectId(tableId, projectId)) {
-                return ResponseEntity.status(404).body(new ErrorMessage("Table not found"));
+                return ResponseEntity.status(404).body(new ErrorResponse("Table not found"));
             }
             tableRepository.deleteById(tableId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             log.error("Erreur lors de la suppression de la table {} du projet {}", tableId, projectId, e);
-            return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
+            return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
-}
 }
