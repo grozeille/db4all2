@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
+import { getTable } from '../services/tableApi';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { QueryBuilder } from '../components/QueryBuilder';
 import type { QueryGroup, FieldOption } from '../components/QueryBuilder';
@@ -23,7 +24,18 @@ const FIELDS: FieldOption[] = [
 
 export default function TableContentPage() {
   const { projectId, tableId } = useParams();
+  const navigate = useNavigate();
   const [filterGroup, setFilterGroup] = useState<QueryGroup>({ operator: 'AND', rules: [] });
+
+  useEffect(() => {
+    if (projectId && tableId) {
+      getTable(projectId, tableId)
+        .catch(err => {
+          navigate(`/error/404`, { state: { message: err.message } });
+        });
+    }
+  }, [projectId, tableId, navigate]);
+
   return (
     <PageLayout>
       <h2>Table content {tableId} (project {projectId})</h2>

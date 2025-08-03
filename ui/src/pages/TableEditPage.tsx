@@ -39,15 +39,19 @@ export default function TableEditPage() {
   // Charge la table existante en édition
   useEffect(() => {
     if (isEdit && projectId && tableId) {
-      getTable(projectId, tableId).then((table: Table) => {
-        setName(table.name);
-        // Pour la démo, on suppose type/dataSource non modifiables
-        setType('csv'); // À remplacer par table.type si dispo
-        setDataSource('CIFS'); // À remplacer par table.dataSource si dispo
-        setConfig({ path: table.description || '', separator: ',', header: true });
-      });
+      getTable(projectId, tableId)
+        .then((table: Table) => {
+          setName(table.name);
+          // Pour la démo, on suppose type/dataSource non modifiables
+          setType('csv'); // À remplacer par table.type si dispo
+          setDataSource('CIFS'); // À remplacer par table.dataSource si dispo
+          setConfig({ path: table.description || '', separator: ',', header: true });
+        })
+        .catch(err => {
+          navigate(`/error/404`, { state: { message: err.message } });
+        });
     }
-  }, [isEdit, projectId, tableId]);
+  }, [isEdit, projectId, tableId, navigate]);
 
   // Scan et upload inchangés
   const handleScan = () => {
@@ -66,7 +70,7 @@ export default function TableEditPage() {
   };
 
   // Save : création ou édition
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name) {
       setError('Le nom est requis');
@@ -79,7 +83,7 @@ export default function TableEditPage() {
       navigate(`/projects/${projectId}/tables/${tableId}/content`);
     } else if (projectId) {
       // Appel API createTable
-      const newTableId = await createTable(projectId, { name, type, dataSource, config });
+      const newTableId = await createTable(projectId, { name, description: config.path });
       navigate(`/projects/${projectId}/tables/${newTableId}/content`);
     }
   };

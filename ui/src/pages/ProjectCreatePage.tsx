@@ -4,21 +4,27 @@ import PageLayout from '../components/PageLayout';
 
 export default function ProjectCreatePage() {
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Ici, on simule la création, puis on redirige vers la liste
-    // TODO: Appeler le vrai service d'API
-    //navigate('/projects');
+    setError('');
+    try {
+      // TODO: Appeler le vrai service d'API
+      // await createProject({ name });
+      navigate('/projects');
+    } catch (err: any) {
+      setError(err.message || 'Unknown error');
+    }
   };
 
   return (
     <PageLayout>
-      <h2>Créer un nouveau projet</h2>
+      <h2>Create a new project</h2>
       <form onSubmit={handleSubmit} className="mt-4" style={{maxWidth: 400}}>
         <div className="mb-3">
-          <label htmlFor="projectName" className="form-label">Nom du projet</label>
+          <label htmlFor="projectName" className="form-label">Project name</label>
           <input
             type="text"
             className="form-control"
@@ -28,7 +34,8 @@ export default function ProjectCreatePage() {
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary">Créer</button>
+        {error && <div className="text-danger mb-2">{error}</div>}
+        <button type="submit" className="btn btn-primary">Create</button>
       </form>
     </PageLayout>
   );

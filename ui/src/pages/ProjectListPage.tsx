@@ -14,8 +14,12 @@ export default function ProjectListPage() {
   const pageSize = 25;
   const navigate = useNavigate(); // Already present in the original code
 
+  const [error, setError] = useState('');
   useEffect(() => {
-    getProjects(debouncedSearch, page).then((data) => setProjects(data));
+    setError('');
+    getProjects(debouncedSearch, page)
+      .then((data) => setProjects(data))
+      .catch((err: any) => setError(err.message || 'Unknown error'));
   }, [debouncedSearch, page]);
 
   // Debounce la recherche
@@ -35,6 +39,7 @@ export default function ProjectListPage() {
         value={search}
         onChange={e => setSearch(e.target.value)}
       />
+      {error && <div className="text-danger mb-2">{error}</div>}
       <div className="row g-3">
         {paged.map((p: Project) => (
           <div className="col-md-4" key={p.id}>

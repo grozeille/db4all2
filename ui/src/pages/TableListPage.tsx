@@ -23,9 +23,13 @@ export default function TableListPage() {
   useEffect(() => {
     if (projectId) {
       getTables(projectId as string, debouncedSearch).then(setTables);
-      getProject(projectId as string).then(setProject);
+      getProject(projectId as string)
+        .then(setProject)
+        .catch(err => {
+          navigate(`/error/404`, { state: { message: err.message } });
+        });
     }
-  }, [projectId, debouncedSearch]);
+  }, [projectId, debouncedSearch, navigate]);
 
   // Debounce la recherche
 
