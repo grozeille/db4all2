@@ -3,18 +3,22 @@ import PageLayout from '../components/PageLayout';
 import { useNavigate } from 'react-router-dom';
 import { getProjects } from '../services/projectApi';
 import type { Project } from '../types/project';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 
 
 export default function ProjectListPage() {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search, 2000);
   const [page, setPage] = useState(1);
   const [projects, setProjects] = useState<Project[]>([]);
   const pageSize = 25;
   const navigate = useNavigate(); // Already present in the original code
 
   useEffect(() => {
-    getProjects(search, page).then((data) => setProjects(data));
-  }, [search, page]);
+    getProjects(debouncedSearch, page).then((data) => setProjects(data));
+  }, [debouncedSearch, page]);
+
+  // Debounce la recherche
 
   const paged = projects.slice((page - 1) * pageSize, page * pageSize);
   const totalPages = Math.ceil(projects.length / pageSize);

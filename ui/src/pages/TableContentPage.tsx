@@ -24,7 +24,6 @@ const FIELDS: FieldOption[] = [
 export default function TableContentPage() {
   const { projectId, tableId } = useParams();
   const [filterGroup, setFilterGroup] = useState<QueryGroup>({ operator: 'AND', rules: [] });
-
   return (
     <PageLayout>
       <h2>Table content {tableId} (project {projectId})</h2>

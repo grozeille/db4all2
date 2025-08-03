@@ -14,4 +14,14 @@ export async function getTable(projectId: string, tableId: string): Promise<Tabl
   return { id: tableId, name: `Table ${tableId}`, description: `Description for table ${tableId}` };
 }
 
-// Add more functions as needed (createTable, updateTable, deleteTable, etc.)
+
+export async function createTable(projectId: string, data: any): Promise<string> {
+  // TODO: Remplacer par un vrai appel API
+  // Retourne l'ID simulé de la nouvelle table
+  return Promise.resolve('42');
+}
+
+export async function updateTable(projectId: string, tableId: string, data: any): Promise<void> {
+  // TODO: Remplacer par un vrai appel API
+  return Promise.resolve();
+}

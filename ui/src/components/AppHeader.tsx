@@ -65,7 +65,7 @@ export default function AppHeader() {
   const crumbs = getBreadcrumbs();
   return (
     <header className="p-3 border-bottom w-100 bg-white">
-      <div className="container-fluid">
+      <div className="w-100">
         <div className="d-flex flex-wrap align-items-center justify-content-between">
           <div className="d-flex align-items-center gap-3 app-header-breadcrumb">
             <Breadcrumb className="mb-0 align-items-center d-flex mb-0">

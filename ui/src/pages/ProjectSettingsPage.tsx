@@ -38,7 +38,6 @@ export default function ProjectSettingsPage() {
   return (
     <PageLayout>
       <h2 className="mb-4 text-start">Project settings: {projectId}</h2>
-      {/* General section */}
       <div className="mb-4 text-start">
         <h4 className="mb-3">General</h4>
         <div className="mb-3">

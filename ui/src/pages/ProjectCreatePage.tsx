@@ -15,23 +15,21 @@ export default function ProjectCreatePage() {
 
   return (
     <PageLayout>
-      <div className="container-fluid">
-        <h2>Créer un nouveau projet</h2>
-        <form onSubmit={handleSubmit} className="mt-4" style={{maxWidth: 400}}>
-          <div className="mb-3">
-            <label htmlFor="projectName" className="form-label">Nom du projet</label>
-            <input
-              type="text"
-              className="form-control"
-              id="projectName"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="btn btn-primary">Créer</button>
-        </form>
-      </div>
+      <h2>Créer un nouveau projet</h2>
+      <form onSubmit={handleSubmit} className="mt-4" style={{maxWidth: 400}}>
+        <div className="mb-3">
+          <label htmlFor="projectName" className="form-label">Nom du projet</label>
+          <input
+            type="text"
+            className="form-control"
+            id="projectName"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" className="btn btn-primary">Créer</button>
+      </form>
     </PageLayout>
   );
 }
