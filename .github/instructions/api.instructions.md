@@ -17,7 +17,7 @@ applyTo: 'api/**'
 - comments in the code should be in english
 
 # Package structure best practices
-- JPA entities must be placed in the `model` package (e.g. `fr.grozeille.dataprep.api.model.Project`).
+- JPA entities must be placed in the `model` package (e.g. `model.fr.grozeille.db4all.api.Project`).
 - DTOs for REST request/response must be placed in the `dto` package (e.g. `fr.grozeille.dataprep.api.dto.ProjectDto`).
 
 

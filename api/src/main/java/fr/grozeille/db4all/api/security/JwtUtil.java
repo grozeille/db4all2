@@ -1,4 +1,4 @@
-package fr.grozeille.dataprep.api.security;
+package fr.grozeille.db4all.api.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

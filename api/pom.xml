@@ -96,7 +96,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>fr.grozeille.dataprep.api.Db4allApiApplication</mainClass>
+                    <mainClass>fr.grozeille.db4all.api.Db4allApiApplication</mainClass>
                 </configuration>
             </plugin>
             <plugin>

@@ -1,8 +1,8 @@
 
-package fr.grozeille.dataprep.api.controller;
+package fr.grozeille.db4all.api.controller;
 
 
-import fr.grozeille.dataprep.api.dto.ErrorResponse;
+import fr.grozeille.db4all.api.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +11,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.util.List;
 import java.util.Optional;
 
-import fr.grozeille.dataprep.api.model.Table;
-import fr.grozeille.dataprep.api.repository.TableRepository;
+import fr.grozeille.db4all.api.model.Table;
+import fr.grozeille.db4all.api.repository.TableRepository;
 
 @RestController
 @RequestMapping("/v2/projects/{projectId}/tables")

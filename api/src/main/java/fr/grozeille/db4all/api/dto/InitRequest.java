@@ -1,4 +1,4 @@
-package fr.grozeille.dataprep.api.dto;
+package fr.grozeille.db4all.api.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

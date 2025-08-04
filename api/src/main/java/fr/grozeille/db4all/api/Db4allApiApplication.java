@@ -1,4 +1,4 @@
-package fr.grozeille.dataprep.api;
+package fr.grozeille.db4all.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

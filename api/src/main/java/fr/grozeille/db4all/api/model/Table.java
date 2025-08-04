@@ -1,4 +1,4 @@
-package fr.grozeille.dataprep.api.model;
+package fr.grozeille.db4all.api.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

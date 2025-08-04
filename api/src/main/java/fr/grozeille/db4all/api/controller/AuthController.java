@@ -1,11 +1,11 @@
-package fr.grozeille.dataprep.api.controller;
+package fr.grozeille.db4all.api.controller;
 
-import fr.grozeille.dataprep.api.dto.LoginRequest;
-import fr.grozeille.dataprep.api.dto.LoginResponse;
-import fr.grozeille.dataprep.api.model.User;
-import fr.grozeille.dataprep.api.dto.ErrorResponse;
-import fr.grozeille.dataprep.api.security.JwtUtil;
-import fr.grozeille.dataprep.api.service.UserService;
+import fr.grozeille.db4all.api.dto.LoginRequest;
+import fr.grozeille.db4all.api.dto.LoginResponse;
+import fr.grozeille.db4all.api.model.User;
+import fr.grozeille.db4all.api.dto.ErrorResponse;
+import fr.grozeille.db4all.api.security.JwtUtil;
+import fr.grozeille.db4all.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

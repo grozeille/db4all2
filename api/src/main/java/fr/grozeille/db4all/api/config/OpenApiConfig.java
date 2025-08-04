@@ -1,4 +1,4 @@
-package fr.grozeille.dataprep.api.config;
+package fr.grozeille.db4all.api.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
@@ -39,6 +39,6 @@ public class OpenApiConfig {
                                                 )
                                 )
                 )
-                .info(new Info().title("DataPrep API").version("v2"));
+                .info(new Info().title("DB4ALL API").version("v2"));
     }
 }

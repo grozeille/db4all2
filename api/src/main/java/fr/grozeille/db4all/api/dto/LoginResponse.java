@@ -1,4 +1,4 @@
-package fr.grozeille.dataprep.api.dto;
+package fr.grozeille.db4all.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
