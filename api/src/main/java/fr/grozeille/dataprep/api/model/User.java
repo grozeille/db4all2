@@ -1,0 +1,24 @@
+package fr.grozeille.dataprep.api.model;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "users")
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class User {
+    @Id
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false, name = "password_hash")
+    private String passwordHash;
+
+    @Column(nullable = false, name = "super_admin")
+    private boolean superAdmin;
+}

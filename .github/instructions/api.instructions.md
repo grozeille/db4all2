@@ -17,6 +17,14 @@ applyTo: 'api/**'
 - comments in the code should be in english
 
 # Package structure best practices
-- JPA entities must be placed in the `entity` package (e.g. `fr.grozeille.dataprep.api.entity.Project`).
+- JPA entities must be placed in the `model` package (e.g. `fr.grozeille.dataprep.api.model.Project`).
 - DTOs for REST request/response must be placed in the `dto` package (e.g. `fr.grozeille.dataprep.api.dto.ProjectDto`).
-- The `model` package is reserved for business objects not mapped to the database.
+
+
+# Class structure
+- static members should be placed at the top of the class
+- members should follow
+- functions should be after the members
+
+# Swagger
+All API endpoints in the REST controllers must provide a OpenAPI documentation. Given the type of the input, output, possible errors, and requested authentication.

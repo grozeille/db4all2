@@ -1,6 +1,6 @@
 package fr.grozeille.dataprep.api.repository;
 
-import fr.grozeille.dataprep.api.entity.User;
+import fr.grozeille.dataprep.api.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

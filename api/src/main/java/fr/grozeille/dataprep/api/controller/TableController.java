@@ -9,11 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.util.List;
+import java.util.Optional;
+
 import fr.grozeille.dataprep.api.model.Table;
 import fr.grozeille.dataprep.api.repository.TableRepository;
 
 @RestController
-@RequestMapping("/projects/{projectId}/tables")
+@RequestMapping("/v2/projects/{projectId}/tables")
 @Slf4j
 public class TableController {
     @Autowired
@@ -33,12 +35,15 @@ public class TableController {
     @GetMapping("/{tableId}")
     public ResponseEntity<?> getById(@PathVariable String projectId, @PathVariable String tableId) {
         try {
-            return tableRepository.findByIdAndProjectId(tableId, projectId)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(404).body(new ErrorMessage("Table not found")));
+            Optional<Table> opt = tableRepository.findByIdAndProjectId(tableId, projectId);
+            if (opt.isPresent()) {
+                return ResponseEntity.ok(opt.get());
+            } else {
+                return ResponseEntity.status(404).body(new ErrorResponse("Table not found"));
+            }
         } catch (Exception e) {
-            log.error("Erreur lors de la récupération de la table {} du projet {}", tableId, projectId, e);
-            return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
+            log.error("Error while retrieving table {} from project {}", tableId, projectId, e);
+            return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
 
@@ -46,17 +51,17 @@ public class TableController {
     public ResponseEntity<?> create(@PathVariable String projectId, @RequestBody Table table) {
         try {
             if (table.getName() == null || table.getName().isEmpty()) {
-                return ResponseEntity.badRequest().body(new ErrorMessage("Name is required"));
+                return ResponseEntity.badRequest().body(new ErrorResponse("Name is required"));
             }
             table.setProjectId(projectId);
             Table saved = tableRepository.save(table);
             return ResponseEntity.ok(saved);
         } catch (DataIntegrityViolationException e) {
-            log.warn("Conflit lors de la création de la table: {}", table.getName());
+            log.warn("Conflict during table creation: {}", table.getName());
             return ResponseEntity.status(400).body(new ErrorResponse("Table name already exists"));
         } catch (Exception e) {
-            log.error("Erreur lors de la création de la table", e);
-            return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
+            log.error("Error during table creation", e);
+            return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
 
@@ -64,20 +69,20 @@ public class TableController {
     public ResponseEntity<?> update(@PathVariable String projectId, @PathVariable String tableId, @RequestBody Table table) {
         try {
             if (!tableRepository.existsByIdAndProjectId(tableId, projectId)) {
-                return ResponseEntity.status(404).body(new ErrorMessage("Table not found"));
+                return ResponseEntity.status(404).body(new ErrorResponse("Table not found"));
             }
             if (table.getName() == null || table.getName().isEmpty()) {
-                return ResponseEntity.badRequest().body(new ErrorMessage("Name is required"));
+                return ResponseEntity.badRequest().body(new ErrorResponse("Name is required"));
             }
             table.setId(tableId);
             table.setProjectId(projectId);
             Table saved = tableRepository.save(table);
             return ResponseEntity.ok(saved);
         } catch (DataIntegrityViolationException e) {
-            log.warn("Conflit lors de la modification de la table: {}", table.getName());
-            return ResponseEntity.status(400).body(new ErrorMessage("Table name already exists"));
+            log.warn("Conflict during table update: {}", table.getName());
+            return ResponseEntity.status(400).body(new ErrorResponse("Table name already exists"));
         } catch (Exception e) {
-            log.error("Erreur lors de la modification de la table {} du projet {}", tableId, projectId, e);
+            log.error("Error while updating table {} from project {}", tableId, projectId, e);
             return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
@@ -91,7 +96,7 @@ public class TableController {
             tableRepository.deleteById(tableId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            log.error("Erreur lors de la suppression de la table {} du projet {}", tableId, projectId, e);
+            log.error("Error while deleting table {} from project {}", tableId, projectId, e);
             return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }

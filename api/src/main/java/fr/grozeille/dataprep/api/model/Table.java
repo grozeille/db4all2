@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 
 @Entity
+@jakarta.persistence.Table(name = "tables")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +18,6 @@ public class Table {
     @Column(nullable = false)
     private String name;
     private String description;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "project_id")
     private String projectId;
 }

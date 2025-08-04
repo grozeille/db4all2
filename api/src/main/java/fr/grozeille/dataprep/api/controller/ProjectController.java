@@ -9,11 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.util.List;
+import java.util.Optional;
+
 import fr.grozeille.dataprep.api.model.Project;
 import fr.grozeille.dataprep.api.repository.ProjectRepository;
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/v2/projects")
 @Slf4j
 public class ProjectController {
     @Autowired
@@ -22,7 +24,7 @@ public class ProjectController {
     @GetMapping
     public List<Project> getAll(@RequestParam(required = false) String search) {
         if (search != null && !search.isEmpty()) {
-            // TODO: ajouter une vraie recherche (ex: findByNameContaining)
+            // TODO: add a real search (e.g., findByNameContaining)
             return projectRepository.findAll().stream()
                 .filter(p -> p.getName() != null && p.getName().toLowerCase().contains(search.toLowerCase()))
                 .toList();
@@ -33,12 +35,15 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable String id) {
         try {
-            return projectRepository.findById(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(404).body(new ErrorResponse("Project not found")));
+            Optional<Project> opt = projectRepository.findById(id);
+            if (opt.isPresent()) {
+                return ResponseEntity.ok(opt.get());
+            } else {
+                return ResponseEntity.status(404).body(new ErrorResponse("Project not found"));
+            }
         } catch (Exception e) {
-            log.error("Erreur lors de la récupération du projet {}", id, e);
-            return ResponseEntity.status(500).body(new ErrorMessage("Internal server error"));
+            log.error("Error while retrieving project {}", id, e);
+            return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
 
@@ -51,10 +56,10 @@ public class ProjectController {
             Project saved = projectRepository.save(project);
             return ResponseEntity.ok(saved);
         } catch (DataIntegrityViolationException e) {
-            log.warn("Conflit lors de la création du projet: {}", project.getName());
+            log.warn("Conflict during project creation: {}", project.getName());
             return ResponseEntity.status(400).body(new ErrorResponse("Project name already exists"));
         } catch (Exception e) {
-            log.error("Erreur lors de la création du projet", e);
+            log.error("Error during project creation", e);
             return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
@@ -72,10 +77,10 @@ public class ProjectController {
             Project saved = projectRepository.save(project);
             return ResponseEntity.ok(saved);
         } catch (DataIntegrityViolationException e) {
-            log.warn("Conflit lors de la modification du projet: {}", project.getName());
+            log.warn("Conflict during project update: {}", project.getName());
             return ResponseEntity.status(400).body(new ErrorResponse("Project name already exists"));
         } catch (Exception e) {
-            log.error("Erreur lors de la modification du projet {}", id, e);
+            log.error("Error while updating project {}", id, e);
             return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
@@ -89,7 +94,7 @@ public class ProjectController {
             projectRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            log.error("Erreur lors de la suppression du projet {}", id, e);
+            log.error("Error while deleting project {}", id, e);
             return ResponseEntity.status(500).body(new ErrorResponse("Internal server error"));
         }
     }
