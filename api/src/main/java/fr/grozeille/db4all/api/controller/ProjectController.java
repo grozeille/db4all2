@@ -5,6 +5,8 @@ package fr.grozeille.db4all.api.controller;
 import fr.grozeille.db4all.api.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,14 +24,14 @@ public class ProjectController {
     private ProjectRepository projectRepository;
 
     @GetMapping
-    public List<Project> getAll(@RequestParam(required = false) String search) {
+    public ResponseEntity<Page<Project>> getAll(@RequestParam(required = false) String search, Pageable pageable) {
+        Page<Project> projects;
         if (search != null && !search.isEmpty()) {
-            // TODO: add a real search (e.g., findByNameContaining)
-            return projectRepository.findAll().stream()
-                .filter(p -> p.getName() != null && p.getName().toLowerCase().contains(search.toLowerCase()))
-                .toList();
+            projects = projectRepository.findByNameContainingIgnoreCase(search, pageable);
+        } else {
+            projects = projectRepository.findAll(pageable);
         }
-        return projectRepository.findAll();
+        return ResponseEntity.ok(projects);
     }
 
     @GetMapping("/{id}")

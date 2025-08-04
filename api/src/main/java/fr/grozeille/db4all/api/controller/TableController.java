@@ -1,18 +1,17 @@
-
 package fr.grozeille.db4all.api.controller;
 
-
 import fr.grozeille.db4all.api.dto.ErrorResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.dao.DataIntegrityViolationException;
-import java.util.List;
-import java.util.Optional;
-
 import fr.grozeille.db4all.api.model.Table;
 import fr.grozeille.db4all.api.repository.TableRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/v2/projects/{projectId}/tables")
@@ -22,14 +21,14 @@ public class TableController {
     private TableRepository tableRepository;
 
     @GetMapping
-    public List<Table> getAll(@PathVariable String projectId, @RequestParam(required = false) String search) {
-        List<Table> tables = tableRepository.findByProjectId(projectId);
+    public ResponseEntity<Page<Table>> getAll(@PathVariable String projectId, @RequestParam(required = false) String search, Pageable pageable) {
+        Page<Table> tables;
         if (search != null && !search.isEmpty()) {
-            return tables.stream()
-                .filter(t -> t.getName() != null && t.getName().toLowerCase().contains(search.toLowerCase()))
-                .toList();
+            tables = tableRepository.findByProjectIdAndNameContainingIgnoreCase(projectId, search, pageable);
+        } else {
+            tables = tableRepository.findByProjectId(projectId, pageable);
         }
-        return tables;
+        return ResponseEntity.ok(tables);
     }
 
     @GetMapping("/{tableId}")
