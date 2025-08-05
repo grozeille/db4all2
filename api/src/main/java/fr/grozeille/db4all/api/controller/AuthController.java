@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/v2/auth")
+@RequestMapping("/api/v2/auth")
 @Slf4j
 @Tag(name = "Authentication", description = "Endpoints for application authentication")
 @RequiredArgsConstructor

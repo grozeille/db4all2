@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
-@RequestMapping("/v2/setup")
+@RequestMapping("/api/v2/setup")
 @Slf4j
 @Tag(name = "Setup", description = "Endpoints for application initialization")
 @RequiredArgsConstructor
