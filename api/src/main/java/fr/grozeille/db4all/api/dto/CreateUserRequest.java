@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 public class CreateUserRequest {
 
-    @Schema(description = "The login for the new user.", required = true)
-    private String login;
+    @Schema(description = "The email for the new user.", required = true)
+    private String email;
 
     @Schema(description = "The password for the new user.", format = "password", required = true)
     private String password;

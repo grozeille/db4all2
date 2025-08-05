@@ -40,11 +40,11 @@ public class UserService {
         return Optional.of(user);
     }
 
-    private void validateUserCredentials(String login, String password) {
-        // Rule: The login must be a valid email address.
+    private void validateUserCredentials(String email, String password) {
+        // Rule: The email must be a valid email address.
         final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
-        if (login == null || !login.matches(EMAIL_REGEX)) {
-            throw new IllegalArgumentException("Invalid email format for login. Please use a valid email address.");
+        if (email == null || !email.matches(EMAIL_REGEX)) {
+            throw new IllegalArgumentException("Invalid email format. Please use a valid email address.");
         }
 
         // Rule: Password must be strong.
@@ -74,32 +74,32 @@ public class UserService {
 
     @Transactional
     public User createUser(CreateUserRequest request) {
-        validateUserCredentials(request.getLogin(), request.getPassword());
+        validateUserCredentials(request.getEmail(), request.getPassword());
 
-        if (userRepository.existsById(request.getLogin())) {
-            throw new IllegalArgumentException("User with this login already exists.");
+        if (userRepository.existsById(request.getEmail())) {
+            throw new IllegalArgumentException("User with this email already exists.");
         }
 
         User user = new User();
-        user.setEmail(request.getLogin());
+        user.setEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setSuperAdmin(request.isSuperAdmin());
         return userRepository.save(user);
     }
 
     @Transactional
-    public void deleteUser(String login) {
-        if (!userRepository.existsById(login)) {
-            throw new UsernameNotFoundException("User not found with login: " + login);
+    public void deleteUser(String email) {
+        if (!userRepository.existsById(email)) {
+            throw new UsernameNotFoundException("User not found with email: " + email);
         }
-        userRepository.deleteById(login);
+        userRepository.deleteById(email);
     }
 
     @Transactional
     public void changeCurrentUserPassword(String oldPassword, String newPassword, Authentication authentication) {
-        String login = authentication.getName();
-        User user = userRepository.findById(login)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with login: " + login));
+        String email = authentication.getName();
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             throw new IllegalArgumentException("Incorrect old password.");
@@ -114,9 +114,9 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUserPasswordByAdmin(String login, String newPassword) {
-        User user = userRepository.findById(login)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with login: " + login));
+    public void updateUserPasswordByAdmin(String email, String newPassword) {
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         if (!isPasswordStrong(newPassword)) {
             throw new IllegalArgumentException("New password is not strong enough.");
@@ -127,14 +127,14 @@ public class UserService {
     }
 
     @Transactional
-    public User updateSuperAdminStatus(String login, boolean superAdmin, Authentication authentication) {
+    public User updateSuperAdminStatus(String email, boolean superAdmin, Authentication authentication) {
         // Rule: A user cannot change their own superAdmin status.
-        if (authentication.getName().equals(login)) {
+        if (authentication.getName().equals(email)) {
             throw new IllegalArgumentException("A user cannot change their own superAdmin status to prevent accidental lock-out.");
         }
 
-        User user = userRepository.findById(login)
-                .orElseThrow(() -> new RuntimeException("User not found: " + login));
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
         user.setSuperAdmin(superAdmin);
         return userRepository.save(user);

@@ -1,0 +1,13 @@
+# Configure the in-memory H2 database for tests
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    # Automatically create and drop the database schema for each test run
+    hibernate:
+      ddl-auto: create-drop
+    # Use the H2 dialect for JPA
+    database-platform: org.hibernate.dialect.H2Dialect
