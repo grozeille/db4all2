@@ -27,4 +27,6 @@ dist-ssr
 .vite
 ui/old
 ui/node_modules
+ui/target
+app/target
 api/target
