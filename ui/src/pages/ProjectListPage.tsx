@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import { useNavigate } from 'react-router-dom';
 import { getProjects } from '../services/projectApi';

@@ -1,9 +1,8 @@
-
 import type { Table } from '../types/table';
 
 const API_URL = '/projects';
 
-export async function getTables(projectId: string, search = '', page = 1): Promise<Table[]> {
+export async function getTables(projectId: string, search = '', _page = 1): Promise<Table[]> {
   const params = search ? `?search=${encodeURIComponent(search)}` : '';
   const res = await fetch(`${API_URL}/${projectId}/tables${params}`);
   if (!res.ok) throw new Error(`Erreur ${res.status}`);

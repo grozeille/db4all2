@@ -1,10 +1,9 @@
-
 import type { Project } from '../types/project';
 
 
 const API_URL = '/projects';
 
-export async function getProjects(search = '', page = 1): Promise<Project[]> {
+export async function getProjects(search = '', _page = 1): Promise<Project[]> {
   const params = search ? `?search=${encodeURIComponent(search)}` : '';
   const res = await fetch(`${API_URL}${params}`);
   if (!res.ok) throw new Error(`Erreur ${res.status}`);

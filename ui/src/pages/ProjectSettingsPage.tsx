@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProject } from '../services/projectApi';
@@ -20,8 +19,8 @@ export default function ProjectSettingsPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
-  const [members, setMembers] = useState<any[]>(FAKE_MEMBERS);
-  const [datasources, setDatasources] = useState<any[]>(FAKE_DATASOURCES);
+  const [members, _setMembers] = useState<any[]>(FAKE_MEMBERS);
+  const [datasources, _setDatasources] = useState<any[]>(FAKE_DATASOURCES);
   const [deleteConfirm, setDeleteConfirm] = useState('');
 
   useEffect(() => {
