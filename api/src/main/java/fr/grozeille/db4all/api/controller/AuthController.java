@@ -44,7 +44,7 @@ public class AuthController {
     })
     @PostMapping(value = "/login", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseEntity<?> login(@ModelAttribute LoginRequest request) {
-        Optional<User> userOpt = userService.authenticate(request.getUsername(), request.getPassword());
+        Optional<User> userOpt = userService.authenticate(request.getEmail(), request.getPassword());
 
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

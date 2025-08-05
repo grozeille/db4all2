@@ -1,7 +1,5 @@
 package fr.grozeille.db4all.api.service;
 
-import fr.grozeille.db4all.api.dto.CreateUserRequest;
-import fr.grozeille.db4all.api.dto.LoginRequest;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +40,7 @@ public class UserService {
 
     private void validateUserCredentials(String email, String password) {
         // Rule: The email must be a valid email address.
-        final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+        final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9\\.-]+\\.[a-zA-Z]{2,6}$";
         if (email == null || !email.matches(EMAIL_REGEX)) {
             throw new IllegalArgumentException("Invalid email format. Please use a valid email address.");
         }
@@ -54,15 +52,15 @@ public class UserService {
     }
 
     @Transactional
-    public void createInitialAdmin(LoginRequest loginRequest) {
+    public void createInitialAdmin(String email, String password) {
         if (isInitialized()) {
             throw new IllegalStateException("Initialization already done.");
         }
-        validateUserCredentials(loginRequest.getUsername(), loginRequest.getPassword());
+        validateUserCredentials(email, password);
 
         User user = new User();
-        user.setEmail(loginRequest.getUsername());
-        user.setPasswordHash(passwordEncoder.encode(loginRequest.getPassword()));
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(password));
         user.setSuperAdmin(true);
         userRepository.save(user);
     }
@@ -73,17 +71,17 @@ public class UserService {
     }
 
     @Transactional
-    public User createUser(CreateUserRequest request) {
-        validateUserCredentials(request.getEmail(), request.getPassword());
+    public User createUser(String email, String password, boolean isSuperAdmin) {
+        validateUserCredentials(email, password);
 
-        if (userRepository.existsById(request.getEmail())) {
+        if (userRepository.existsById(email)) {
             throw new IllegalArgumentException("User with this email already exists.");
         }
 
         User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setSuperAdmin(request.isSuperAdmin());
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setSuperAdmin(isSuperAdmin);
         return userRepository.save(user);
     }
 

@@ -1,5 +1,6 @@
 package fr.grozeille.db4all.api.controller;
 
+import fr.grozeille.db4all.api.dto.AdminUpdatePasswordRequest;
 import fr.grozeille.db4all.api.dto.CreateUserRequest;
 import fr.grozeille.db4all.api.dto.UpdatePasswordRequest;
 import fr.grozeille.db4all.api.dto.UpdateSuperAdminRequest;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v2/users")
+@RequestMapping("/api/v2/users")
 @Tag(name = "User Management", description = "APIs for managing users.")
 @SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
@@ -36,15 +37,15 @@ public class UserController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "Create a new user", description = "Requires SUPER_ADMIN role.")
     public ResponseEntity<User> createUser(@RequestBody CreateUserRequest request) {
-        User newUser = userService.createUser(request);
+        User newUser = userService.createUser(request.getEmail(), request.getPassword(), request.isSuperAdmin());
         return ResponseEntity.ok(newUser);
     }
 
-    @DeleteMapping("/{login}")
+    @DeleteMapping("/{email}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "Delete a user", description = "Requires SUPER_ADMIN role.")
-    public ResponseEntity<Void> deleteUser(@PathVariable String login) {
-        userService.deleteUser(login);
+    public ResponseEntity<Void> deleteUser(@PathVariable String email) {
+        userService.deleteUser(email);
         return ResponseEntity.noContent().build();
     }
 
@@ -56,19 +57,19 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{login}/password")
+    @PutMapping("/{email}/password")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    @Operation(summary = "Update any user's password", description = "Allows a SUPER_ADMIN to change any user's password. The 'oldPassword' field is ignored.")
-    public ResponseEntity<Void> updateUserPassword(@PathVariable String login, @RequestBody UpdatePasswordRequest request) {
-        userService.updateUserPasswordByAdmin(login, request.getNewPassword());
+    @Operation(summary = "Update any user's password", description = "Allows a SUPER_ADMIN to change any user's password.")
+    public ResponseEntity<Void> updateUserPassword(@PathVariable String email, @RequestBody AdminUpdatePasswordRequest request) {
+        userService.updateUserPasswordByAdmin(email, request.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{login}/superadmin")
+    @PutMapping("/{email}/superadmin")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "Update a user's SUPER_ADMIN status", description = "Allows a SUPER_ADMIN to grant or revoke another user's SUPER_ADMIN rights. A user cannot change their own status.")
-    public ResponseEntity<User> updateSuperAdminStatus(@PathVariable String login, @RequestBody UpdateSuperAdminRequest request, Authentication authentication) {
-        User updatedUser = userService.updateSuperAdminStatus(login, request.isSuperAdmin(), authentication);
+    public ResponseEntity<User> updateSuperAdminStatus(@PathVariable String email, @RequestBody UpdateSuperAdminRequest request, Authentication authentication) {
+        User updatedUser = userService.updateSuperAdminStatus(email, request.isSuperAdmin(), authentication);
         return ResponseEntity.ok(updatedUser);
     }
 }

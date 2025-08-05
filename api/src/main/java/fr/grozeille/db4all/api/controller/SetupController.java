@@ -49,7 +49,7 @@ public class SetupController {
     @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseEntity<?> initialize(@ModelAttribute LoginRequest req) {
         try {
-            userService.createInitialAdmin(req);
+            userService.createInitialAdmin(req.getEmail(), req.getPassword());
             return ResponseEntity.ok().build();
         } catch (IllegalStateException e) {
             log.error("Initialization attempt failed: already initialized.", e);

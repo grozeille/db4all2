@@ -30,11 +30,12 @@ This document summarizes the development best practices and architectural rules 
 
 ## 4. Data Transfer Objects (DTOs)
 
-- **Dedicated DTOs:** Use specific DTOs for API requests and responses (e.g., `LoginRequest`, `ErrorResponse`). Do not expose JPA entities directly in the API.
+- **Dedicated DTOs:** Use specific DTOs for API requests and responses (e.g., `LoginRequest`, `ErrorResponse`). 
 - **Package Organization:**
-  - DTOs belong in the `fr.grozeille.dataprep.api.dto` package.
-  - JPA entities and business models belong in the `fr.grozeille.dataprep.model` package.
+  - DTOs belong in the `fr.grozeille.db4all.api.dto` package.
+  - JPA entities and business models belong in the `fr.grozeille.db4all.model` package.
 - **API-Specific Annotations:** Use annotations like `@Schema(format = "password")` in DTOs to provide hints to API documentation tools like Swagger UI.
+- **No usage of DTO in the service layer**: DTOs are used only for API requests and responses. They should not be used in the service layer, which should work with business models or entities directly. If needed, use a Mapping library to map the DTP to a model object. Ex: we don't need the ID to create a Project, so use a `ProjectCreateRequest` DTO without an ID field, and map it to a `Project` entity in the service layer.
 
 ## 5. Error Handling and Logging
 

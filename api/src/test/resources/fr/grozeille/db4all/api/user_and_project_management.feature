@@ -4,10 +4,10 @@ Feature: User and Project Management Flows
   Scenario: A user is created, manages projects, and manages tables
     Given the system is set up with an initial super admin "admin@test.com"
     And I am logged in as the super admin "admin@test.com"
-    When I create a new user with email "newuser@test.com" and password "a-secure-password"
+    When I create a new user with email "newuser@test.com" and password "ABC123abc"
     Then the user "newuser@test.com" is created successfully
 
-    When I, as an admin, change the password for "newuser@test.com" to "a-new-secure-password"
+    When I, as an admin, change the password for "newuser@test.com" to "abc123ABC"
     Then the password change is successful
 
     # --- Switch to acting as the new user ---

@@ -1,6 +1,7 @@
 package fr.grozeille.db4all.api.model;
 
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import jakarta.persistence.Column;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Project {
     @Id
     private String id;
