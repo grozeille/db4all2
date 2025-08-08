@@ -53,17 +53,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-            .authorizeHttpRequests(auth -> auth
+        http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                        "/v2/auth/**",
-                        "/v2/setup/**",
-                        "/v2/error/**",
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
-                ).permitAll()
-                .anyRequest().authenticated()
+                        "/api/v2/projects/**",
+                        "/api/v2/users/**"
+                ).authenticated()
+                .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

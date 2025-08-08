@@ -21,7 +21,6 @@
     <modules>
         <module>ui</module>
         <module>api</module>
-        <module>app</module>
     </modules>
 
 </project>
