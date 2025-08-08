@@ -27,6 +27,7 @@ import java.util.Optional;
 @RequestMapping("/api/v2/projects/{projectId}/tables")
 @Tag(name = "Table Management", description = "APIs for managing tables within a project.")
 @SecurityRequirement(name = "bearerAuth")
+@SecurityRequirement(name = "passwordFlow")
 @Slf4j
 @RequiredArgsConstructor
 public class TableController {

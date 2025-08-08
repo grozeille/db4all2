@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v2/projects")
 @Tag(name = "Project Management", description = "APIs for managing projects.")
 @SecurityRequirement(name = "bearerAuth")
+@SecurityRequirement(name = "passwordFlow")
 @RequiredArgsConstructor
 public class ProjectController {
 

@@ -1,38 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { initializeApplication } from '../services/setupApi';
+import { initializeApplication, checkInitialization } from '../services/setupApi';
+import { useApi } from '../hooks/useApi';
 
 const SetupPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    // Local error for password confirmation, separate from API errors
+    const [formError, setFormError] = useState<string | null>(null);
     const navigate = useNavigate();
+
+    // Hook to check if the application is already set up
+    const { request: performSetupCheck } = useApi(checkInitialization);
+
+    // Hook for the main initialization API call
+    const { loading: isSubmitting, error: apiError, request: performInit } = useApi(initializeApplication);
+
+    useEffect(() => {
+        performSetupCheck()
+            .then((result) => {
+                if (result) {
+                    // If this succeeds, the app is already initialized.
+                    navigate('/login');
+                }
+            })
+            .catch(() => {
+                // This is expected if the app is not set up.
+                console.info("Application not initialized, displaying setup page.");
+            });
+    }, [performSetupCheck, navigate]);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        setError(null);
+        setFormError(null);
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match.');
+            setFormError('Passwords do not match.');
             return;
         }
 
-        setIsSubmitting(true);
         try {
-            await initializeApplication(email, password);
+            await performInit(email, password);
             navigate('/login', { state: { message: 'Application initialized successfully! Please log in.' } });
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('An unknown error occurred.');
-            }
-        } finally {
-            setIsSubmitting(false);
+            // The useApi hook handles setting the apiError state.
+            // We just need to catch the promise rejection to prevent unhandled promise errors.
+            console.error("Initialization failed:", err);
         }
     };
+
+    // Combine form validation error with API error for display
+    const displayError = formError || apiError;
 
     return (
         <div className="container mt-5">
@@ -79,7 +98,7 @@ const SetupPage: React.FC = () => {
                                         disabled={isSubmitting}
                                     />
                                 </div>
-                                {error && <div className="alert alert-danger">{error}</div>}
+                                {displayError && <div className="alert alert-danger">{displayError}</div>}
                                 <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
                                     {isSubmitting ? 'Creating...' : 'Create Administrator'}
                                 </button>

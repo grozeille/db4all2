@@ -22,6 +22,7 @@ import java.util.List;
 @RequestMapping("/api/v2/users")
 @Tag(name = "User Management", description = "APIs for managing users.")
 @SecurityRequirement(name = "bearerAuth")
+@SecurityRequirement(name = "passwordFlow")
 @RequiredArgsConstructor
 public class UserController {
 

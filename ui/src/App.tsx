@@ -11,7 +11,7 @@ import LoginPage from './pages/LoginPage';
 import SetupPage from './pages/SetupPage'; // Import the new setup page
 
 // The main application layout with a navbar and logout button
-const MainLayout = ({ children, onLogout }) => (
+const MainLayout = ({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) => (
     <div>
         <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
             <div className="container-fluid">

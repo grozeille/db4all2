@@ -5,13 +5,16 @@ import { useLocation } from 'react-router-dom';
 import { getTables } from '../services/tableApi';
 import { getProject } from '../services/projectApi';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
-
+import type { Table } from '../types/table';
+import type { Page } from '../types/page';
 
 export default function TableListPage() {
   const { projectId } = useParams();
-  const [tables, setTables] = useState<{ id: string; name: string; description: string }[]>([]);
+  const [tablesPage, setTablesPage] = useState<Page<Table> | null>(null);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 2000);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
   const [project, setProject] = useState<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,16 +23,18 @@ export default function TableListPage() {
 
   useEffect(() => {
     if (projectId) {
-      getTables(projectId as string, debouncedSearch).then(setTables);
+      getTables(projectId as string, debouncedSearch, { page, size: pageSize }).then(setTablesPage);
       getProject(projectId as string)
         .then(setProject)
         .catch(err => {
           navigate(`/error/404`, { state: { message: err.message } });
         });
     }
-  }, [projectId, debouncedSearch, navigate]);
+  }, [projectId, debouncedSearch, navigate, page, pageSize]);
 
   // Debounce la recherche
+  const tables = tablesPage ? tablesPage.content : [];
+  const totalPages = tablesPage ? tablesPage.totalPages : 0;
 
   return (
     <PageLayout>
@@ -62,6 +67,10 @@ export default function TableListPage() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="d-flex justify-content-center mt-4 gap-2">
+        <button className="btn btn-outline-secondary" disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button>
+        <button className="btn btn-outline-secondary" disabled={page + 1 >= totalPages} onClick={() => setPage(page + 1)}>Next</button>
       </div>
     </PageLayout>
   );

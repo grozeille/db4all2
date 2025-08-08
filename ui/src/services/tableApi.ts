@@ -1,4 +1,5 @@
-import type { Table, Page } from '../types/table';
+import type { Table } from '../types/table';
+import type { Page } from '../types/page';
 import { getAuthHeaders } from "./utils";
 
 const API_URL = '/api/v2/projects';

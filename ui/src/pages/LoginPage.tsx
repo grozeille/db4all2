@@ -1,52 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/userApi';
+import { login } from '../services/authApi';
 import { checkInitialization } from '../services/setupApi';
+import { useApi } from '../hooks/useApi';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // To show a loading state during check
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const performSetupCheck = async () => {
-            try {
-                const isInitialized = await checkInitialization();
-                if (!isInitialized) {
-                    navigate('/setup');
-                } else {
-                    setIsLoading(false); // Show login form
-                }
-            } catch (err) {
-                setError('Could not connect to the server.');
-                console.error(err);
-                setIsLoading(false);
-            }
-        };
+    // Hook for the setup check
+    const { loading: isCheckingSetup, request: performSetupCheck } = useApi(checkInitialization);
 
-        performSetupCheck();
-    }, [navigate]);
+    // Hook for the login submission
+    const { loading: isSubmitting, error: loginError, request: performLogin } = useApi(login);
+
+    useEffect(() => {
+        performSetupCheck()
+            .then((result) => {
+                if (!result) {
+                    // If this succeeds, the app is already initialized.
+                    navigate('/setup');
+                }
+            })
+            .catch(() => {
+                // This means the app is not initialized, redirect to setup.
+                navigate('/setup');
+            });
+    }, [performSetupCheck, navigate]);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        setError(null);
         try {
-            const data = await login(email, password);
+            const data = await performLogin(email, password);
             if (data && data.access_token) {
                 localStorage.setItem('token', data.access_token);
                 navigate('/'); // Redirect to the main application
             } else {
+                // This case is unlikely if the API throws on failure, but good for safety
                 throw new Error('Login response did not contain a token.');
             }
         } catch (err) {
-            setError('Invalid email or password');
-            console.error(err);
+            // The useApi hook automatically sets the error state.
+            // We can log the error here or perform other side-effects if needed.
+            console.error("Login failed:", err);
         }
     };
 
-    if (isLoading) {
+    if (isCheckingSetup) {
         return <div>Loading...</div>; // Or a spinner component
     }
 
@@ -67,6 +68,7 @@ const LoginPage: React.FC = () => {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
+                                        disabled={isSubmitting}
                                     />
                                 </div>
                                 <div className="form-group mb-3">
@@ -78,11 +80,12 @@ const LoginPage: React.FC = () => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
+                                        disabled={isSubmitting}
                                     />
                                 </div>
-                                {error && <div className="alert alert-danger">{error}</div>}
-                                <button type="submit" className="btn btn-primary w-100">
-                                    Login
+                                {loginError && <div className="alert alert-danger">{loginError}</div>}
+                                <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Logging in...' : 'Login'}
                                 </button>
                             </form>
                         </div>

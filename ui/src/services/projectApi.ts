@@ -1,4 +1,5 @@
-import type { Project, Page } from '../types/project';
+import type { Project } from '../types/project';
+import type { Page } from '../types/page';
 import { getAuthHeaders } from "./utils";
 
 const API_URL = '/api/v2/projects';

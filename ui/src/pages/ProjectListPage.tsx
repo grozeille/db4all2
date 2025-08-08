@@ -4,28 +4,29 @@ import { useNavigate } from 'react-router-dom';
 import { getProjects } from '../services/projectApi';
 import type { Project } from '../types/project';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import type { Page } from '../types/page';
 
 
 export default function ProjectListPage() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 2000);
-  const [page, setPage] = useState(1);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [page, setPage] = useState(0);
+  const [projectsPage, setProjectsPage] = useState<Page<Project> | null>(null);
   const pageSize = 25;
   const navigate = useNavigate(); // Already present in the original code
 
   const [error, setError] = useState('');
   useEffect(() => {
     setError('');
-    getProjects(debouncedSearch, page)
-      .then((data) => setProjects(data))
+    getProjects(debouncedSearch, { page, size: pageSize })
+      .then((data) => setProjectsPage(data))
       .catch((err: any) => setError(err.message || 'Unknown error'));
-  }, [debouncedSearch, page]);
+  }, [debouncedSearch, page, pageSize]);
 
   // Debounce la recherche
 
-  const paged = projects.slice((page - 1) * pageSize, page * pageSize);
-  const totalPages = Math.ceil(projects.length / pageSize);
+  const paged = projectsPage ? projectsPage.content : [];
+  const totalPages = projectsPage ? projectsPage.totalPages : 0;
 
   return (
     <PageLayout>
@@ -53,8 +54,8 @@ export default function ProjectListPage() {
         ))}
       </div>
       <div className="d-flex justify-content-center mt-4 gap-2">
-        <button className="btn btn-outline-secondary" disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button>
-        <button className="btn btn-outline-secondary" disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</button>
+        <button className="btn btn-outline-secondary" disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button>
+        <button className="btn btn-outline-secondary" disabled={page + 1 === totalPages} onClick={() => setPage(page + 1)}>Next</button>
       </div>
     </PageLayout>
   );
