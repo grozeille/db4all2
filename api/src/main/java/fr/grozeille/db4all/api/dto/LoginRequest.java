@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class LoginRequest {
-    private String email;
+    private String username;
     @Schema(format = "password")
     private String password;
 }

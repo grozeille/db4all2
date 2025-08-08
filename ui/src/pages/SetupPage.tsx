@@ -29,7 +29,7 @@ const SetupPage: React.FC = () => {
                 // This is expected if the app is not set up.
                 console.info("Application not initialized, displaying setup page.");
             });
-    }, [performSetupCheck, navigate]);
+    }, []);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();

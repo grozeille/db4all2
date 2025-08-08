@@ -12,9 +12,9 @@ export async function checkInitialization(): Promise<boolean> {
     throw new Error(`Failed to check initialization: ${response.statusText}`);
 }
 
-export async function initializeApplication(email: string, password: string) {
+export async function initializeApplication(username: string, password: string) {
     const body = new URLSearchParams();
-    body.append('email', email);
+    body.append('username', username);
     body.append('password', password);
 
     const response = await fetch(API_URL, {

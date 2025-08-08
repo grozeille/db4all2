@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
                 // This means the app is not initialized, redirect to setup.
                 navigate('/setup');
             });
-    }, [performSetupCheck, navigate]);
+    }, []);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
