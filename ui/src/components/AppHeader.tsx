@@ -3,10 +3,12 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getProject } from '../services/projectApi';
 import { getTable } from '../services/tableApi';
+import { userApi } from "../services/userApi.ts";
+import type { User } from "../types/auth.ts";
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import Dropdown from 'react-bootstrap/Dropdown';
 
-export default function AppHeader({ onLogout }: { onLogout: () => void }) {
+export function AppHeader({ onLogout }: { onLogout: () => void }) {
   // Style global pour le breadcrumb dans le header
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -21,6 +23,11 @@ export default function AppHeader({ onLogout }: { onLogout: () => void }) {
   const pathnames = location.pathname.split('/').filter(Boolean);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [tableName, setTableName] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    userApi.getMe().then(setUser).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (params.projectId) {
@@ -88,8 +95,8 @@ export default function AppHeader({ onLogout }: { onLogout: () => void }) {
               </svg>
             </Dropdown.Toggle>
             <Dropdown.Menu className="text-small">
-              <Dropdown.Item href="#">Profile</Dropdown.Item>
-              <Dropdown.Item href="#">Admin.</Dropdown.Item>
+              <Dropdown.Item href="/profile">Profile</Dropdown.Item>
+              {user?.superAdmin && <Dropdown.Item href="/admin">Admin.</Dropdown.Item>}
               <Dropdown.Divider />
               <Dropdown.Item onClick={onLogout}>Sign out</Dropdown.Item>
             </Dropdown.Menu>

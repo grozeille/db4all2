@@ -9,7 +9,9 @@ import TableContentPage from './pages/TableContentPage';
 import TableEditPage from './pages/TableEditPage';
 import LoginPage from './pages/LoginPage';
 import SetupPage from './pages/SetupPage'; // Import the new setup page
-import AppHeader from './components/AppHeader';
+import { ProfilePage } from "./pages/ProfilePage.tsx";
+import { AdminPage } from "./pages/AdminPage.tsx";
+import { AppHeader } from './components/AppHeader';
 
 // A wrapper for all routes that require authentication
 const ProtectedRoutes = () => {
@@ -56,6 +58,8 @@ const ProtectedRoutes = () => {
                     <Route path="/projects/:projectId/tables/new" element={<TableEditPage />} />
                     <Route path="/projects/:projectId/tables/:tableId/content" element={<TableContentPage />} />
                     <Route path="/projects/:projectId/tables/:tableId/settings" element={<TableEditPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/admin" element={<AdminPage />} />
                     <Route path="/error/:code" element={<ErrorRoute />} />
                     <Route path="*" element={<ErrorPage code={404} />} />
                 </Routes>

@@ -192,7 +192,7 @@ export default function TableEditPage() {
   };
 
   return (
-    <PageLayout>
+    <>
       <h2>{isEdit ? `Édition de la table ${tableId}` : "Ajout d'une nouvelle table"}</h2>
       <form onSubmit={handleSave} className="mt-4" style={{ maxWidth: 600 }}>
         <div className="mb-3">
@@ -214,6 +214,6 @@ export default function TableEditPage() {
           <button type="submit" className="btn btn-primary">Save</button>
         </div>
       </form>
-    </PageLayout>
+    </>
   );
 }
