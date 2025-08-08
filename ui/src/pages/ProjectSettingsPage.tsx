@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import PageLayout from '../components/PageLayout';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProject } from '../services/projectApi';
 export default function ProjectSettingsPage() {
@@ -48,7 +47,7 @@ export default function ProjectSettingsPage() {
   };
 
   return (
-    <PageLayout>
+    <>
       <div>
         <h2 className="mb-4 text-start">Project settings: {projectId}</h2>
         <div className="mb-4 text-start">
@@ -129,6 +128,6 @@ export default function ProjectSettingsPage() {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   );
 }

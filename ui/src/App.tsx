@@ -9,21 +9,7 @@ import TableContentPage from './pages/TableContentPage';
 import TableEditPage from './pages/TableEditPage';
 import LoginPage from './pages/LoginPage';
 import SetupPage from './pages/SetupPage'; // Import the new setup page
-
-// The main application layout with a navbar and logout button
-const MainLayout = ({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) => (
-    <div>
-        <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
-            <div className="container-fluid">
-                <a className="navbar-brand" href="/">DataPrep UI</a>
-                <button className="btn btn-outline-secondary" onClick={onLogout}>Logout</button>
-            </div>
-        </nav>
-        <main className="container">
-            {children}
-        </main>
-    </div>
-);
+import AppHeader from './components/AppHeader';
 
 // A wrapper for all routes that require authentication
 const ProtectedRoutes = () => {
@@ -58,20 +44,23 @@ const ProtectedRoutes = () => {
     }
 
     return (
-        <MainLayout onLogout={handleLogout}>
-            <Routes>
-                <Route path="/" element={<ProjectListPage />} />
-                <Route path="/projects" element={<ProjectListPage />} />
-                <Route path="/projects/new" element={<ProjectCreatePage />} />
-                <Route path="/projects/:projectId/settings" element={<ProjectSettingsPage />} />
-                <Route path="/projects/:projectId/tables" element={<TableListPage />} />
-                <Route path="/projects/:projectId/tables/new" element={<TableEditPage />} />
-                <Route path="/projects/:projectId/tables/:tableId/content" element={<TableContentPage />} />
-                <Route path="/projects/:projectId/tables/:tableId/settings" element={<TableEditPage />} />
-                <Route path="/error/:code" element={<ErrorRoute />} />
-                <Route path="*" element={<ErrorPage code={404} />} />
-            </Routes>
-        </MainLayout>
+        <>
+            <AppHeader onLogout={handleLogout} />
+            <main className="container-fluid py-4" style={{ minHeight: '100vh' }}>
+                <Routes>
+                    <Route path="/" element={<ProjectListPage />} />
+                    <Route path="/projects" element={<ProjectListPage />} />
+                    <Route path="/projects/new" element={<ProjectCreatePage />} />
+                    <Route path="/projects/:projectId/settings" element={<ProjectSettingsPage />} />
+                    <Route path="/projects/:projectId/tables" element={<TableListPage />} />
+                    <Route path="/projects/:projectId/tables/new" element={<TableEditPage />} />
+                    <Route path="/projects/:projectId/tables/:tableId/content" element={<TableContentPage />} />
+                    <Route path="/projects/:projectId/tables/:tableId/settings" element={<TableEditPage />} />
+                    <Route path="/error/:code" element={<ErrorRoute />} />
+                    <Route path="*" element={<ErrorPage code={404} />} />
+                </Routes>
+            </main>
+        </>
     );
 };
 

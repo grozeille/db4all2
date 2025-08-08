@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
 
 export default function ProjectCreatePage() {
   const [name, setName] = useState('');
@@ -20,7 +19,7 @@ export default function ProjectCreatePage() {
   };
 
   return (
-    <PageLayout>
+    <>
       <h2>Create a new project</h2>
       <form onSubmit={handleSubmit} className="mt-4" style={{maxWidth: 400}}>
         <div className="mb-3">
@@ -37,6 +36,6 @@ export default function ProjectCreatePage() {
         {error && <div className="text-danger mb-2">{error}</div>}
         <button type="submit" className="btn btn-primary">Create</button>
       </form>
-    </PageLayout>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import PageLayout from '../components/PageLayout';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getTable, createTable, updateTable } from '../services/tableApi';
 import type { Table } from '../types/table';

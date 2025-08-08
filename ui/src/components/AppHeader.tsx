@@ -6,7 +6,7 @@ import { getTable } from '../services/tableApi';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import Dropdown from 'react-bootstrap/Dropdown';
 
-export default function AppHeader() {
+export default function AppHeader({ onLogout }: { onLogout: () => void }) {
   // Style global pour le breadcrumb dans le header
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -63,6 +63,7 @@ export default function AppHeader() {
     return crumbs;
   }
   const crumbs = getBreadcrumbs();
+
   return (
     <header className="p-3 border-bottom w-100 bg-white">
       <div className="w-100">
@@ -90,7 +91,7 @@ export default function AppHeader() {
               <Dropdown.Item href="#">Profile</Dropdown.Item>
               <Dropdown.Item href="#">Admin.</Dropdown.Item>
               <Dropdown.Divider />
-              <Dropdown.Item href="#">Sign out</Dropdown.Item>
+              <Dropdown.Item onClick={onLogout}>Sign out</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>

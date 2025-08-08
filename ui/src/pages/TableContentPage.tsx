@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import PageLayout from '../components/PageLayout';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
 import { getTable } from '../services/tableApi';
@@ -36,7 +35,7 @@ export default function TableContentPage() {
   }, [projectId, tableId, navigate]);
 
   return (
-    <PageLayout>
+    <>
       <h2>Table content {tableId} (project {projectId})</h2>
       <div className="mb-3">
         <details>
@@ -55,6 +54,6 @@ export default function TableContentPage() {
           domLayout="autoHeight"
         />
       </div>
-    </PageLayout>
+    </>
   );
 }
