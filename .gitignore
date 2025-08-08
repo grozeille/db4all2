@@ -30,3 +30,5 @@ ui/node_modules
 ui/target
 app/target
 api/target
+
+api-docs.json

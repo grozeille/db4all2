@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,12 +19,14 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<Project>> getAll(@RequestParam(required = false) String search, Pageable pageable) {
         Page<Project> projects = projectService.findAll(search, pageable);
         return ResponseEntity.ok(projects);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Project> getById(@PathVariable String id) {
         return projectService.findById(id)
                 .map(ResponseEntity::ok)
@@ -31,18 +34,21 @@ public class ProjectController {
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Project> create(@RequestBody ProjectCreationRequest request) {
         Project createdProject = projectService.create(request.getName(), request.getDescription());
         return ResponseEntity.ok(createdProject);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Project> update(@PathVariable String id, @RequestBody ProjectUpdateRequest request) {
         Project updatedProject = projectService.update(id, request.getName(), request.getDescription());
         return ResponseEntity.ok(updatedProject);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         projectService.delete(id);
         return ResponseEntity.noContent().build();

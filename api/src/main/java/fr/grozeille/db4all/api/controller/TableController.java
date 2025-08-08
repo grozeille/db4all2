@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -24,12 +25,14 @@ public class TableController {
     private final TableService tableService;
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<Table>> getAll(@PathVariable String projectId, @RequestParam(required = false) String search, Pageable pageable) {
         Page<Table> tables = tableService.findAll(projectId, search, pageable);
         return ResponseEntity.ok(tables);
     }
 
     @GetMapping("/{tableId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getById(@PathVariable String projectId, @PathVariable String tableId) {
         Optional<Table> opt = tableService.findById(tableId, projectId);
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok)
@@ -37,6 +40,7 @@ public class TableController {
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> create(@PathVariable String projectId, @RequestBody TableCreationRequest request) {
         try {
             if (request.getName() == null || request.getName().isEmpty()) {
@@ -54,6 +58,7 @@ public class TableController {
     }
 
     @PutMapping("/{tableId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> update(@PathVariable String projectId, @PathVariable String tableId, @RequestBody TableUpdateRequest request) {
         try {
             if (!tableService.exists(tableId, projectId)) {
@@ -74,6 +79,7 @@ public class TableController {
     }
 
     @DeleteMapping("/{tableId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> delete(@PathVariable String projectId, @PathVariable String tableId) {
         try {
             if (!tableService.exists(tableId, projectId)) {
