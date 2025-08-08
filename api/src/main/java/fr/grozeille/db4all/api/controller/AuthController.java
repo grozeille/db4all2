@@ -31,16 +31,12 @@ public class AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    /**
-     * Authenticates a user and returns a JWT token.
-     * @return 200 OK with token, 401 UNAUTHORIZED with error message otherwise
-     */
-    @Operation(summary = "Login", description = "Authenticates a user and returns a JWT token.")
+    @Operation(summary = "User Login", description = "Authenticates a user with email and password, returning a JWT token upon success.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Login successful",
-            content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-        @ApiResponse(responseCode = "401", description = "Invalid credentials",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        @ApiResponse(responseCode = "200", description = "Authentication successful.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))),
+        @ApiResponse(responseCode = "401", description = "Authentication failed due to invalid credentials.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping(value = "/login", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseEntity<?> login(@ModelAttribute LoginRequest request) {

@@ -5,6 +5,13 @@ import fr.grozeille.db4all.api.dto.TableCreationRequest;
 import fr.grozeille.db4all.api.dto.TableUpdateRequest;
 import fr.grozeille.db4all.api.model.Table;
 import fr.grozeille.db4all.api.service.TableService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,12 +25,20 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v2/projects/{projectId}/tables")
+@Tag(name = "Table Management", description = "APIs for managing tables within a project.")
+@SecurityRequirement(name = "bearerAuth")
 @Slf4j
 @RequiredArgsConstructor
 public class TableController {
 
     private final TableService tableService;
 
+    @Operation(summary = "List all tables in a project", description = "Retrieves a paginated list of tables for a given project, optionally filtered by a search term.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of tables."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Project with the specified ID not found.", content = @Content)
+    })
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<Table>> getAll(@PathVariable String projectId, @RequestParam(required = false) String search, Pageable pageable) {
@@ -31,6 +46,12 @@ public class TableController {
         return ResponseEntity.ok(tables);
     }
 
+    @Operation(summary = "Get a table by ID", description = "Retrieves a single table by its unique ID within a given project.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the table."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Table or Project with the specified ID not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping("/{tableId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getById(@PathVariable String projectId, @PathVariable String tableId) {
@@ -39,6 +60,13 @@ public class TableController {
                 .orElseGet(() -> ResponseEntity.status(404).body(new ErrorResponse("Table not found")));
     }
 
+    @Operation(summary = "Create a new table", description = "Creates a new table with a name and description within a given project.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Table created successfully."),
+            @ApiResponse(responseCode = "400", description = "Invalid request, e.g., missing name or name already exists.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Project with the specified ID not found.", content = @Content)
+    })
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> create(@PathVariable String projectId, @RequestBody TableCreationRequest request) {
@@ -57,6 +85,13 @@ public class TableController {
         }
     }
 
+    @Operation(summary = "Update a table", description = "Updates an existing table's name and description.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Table updated successfully."),
+            @ApiResponse(responseCode = "400", description = "Invalid request, e.g., missing name or name already exists.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Table or Project with the specified ID not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @PutMapping("/{tableId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> update(@PathVariable String projectId, @PathVariable String tableId, @RequestBody TableUpdateRequest request) {
@@ -78,6 +113,12 @@ public class TableController {
         }
     }
 
+    @Operation(summary = "Delete a table", description = "Deletes a table and all of its associated data by its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Table deleted successfully."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Table or Project with the specified ID not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @DeleteMapping("/{tableId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> delete(@PathVariable String projectId, @PathVariable String tableId) {
