@@ -4,18 +4,18 @@ import type { ApiListPage } from "./utils.ts";
 
 export const userApi = {
   getMe: async function() {
-    return await api.get<User>("/api/users/me");
+    return await api.get<User>("/api/v2/users/me");
   },
   getAll: async function() {
-    return await api.get<ApiListPage<User>>(`/api/users`);
+    return await api.get<ApiListPage<User>>(`/api/v2/users`);
   },
   createUser: async function(user: UserCreate) {
-    return await api.post<User>("/api/users", user);
+    return await api.post<User>("/api/v2/users", user);
   },
   adminUpdatePassword: async function(login: string, request: UpdatePasswordRequest) {
-    return await api.put<void>(`/api/users/${login}/password`, request);
+    return await api.put<void>(`/api/v2/users/${login}/password`, request);
   },
   updateMyPassword: async function(request: UpdatePasswordRequest) {
-    return await api.put<void>("/api/users/me/password", request);
+    return await api.put<void>("/api/v2/users/password", request);
   }
 }
