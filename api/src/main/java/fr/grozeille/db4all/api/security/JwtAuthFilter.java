@@ -33,7 +33,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 boolean superAdmin = Boolean.TRUE.equals(claims.get("superAdmin", Boolean.class));
                 UserDetails userDetails = User.withUsername(email)
                         .password("")
-                        .authorities(superAdmin ? "ROLE_SUPERADMIN" : "ROLE_USER")
+                        .authorities(superAdmin ? "ROLE_SUPER_ADMIN" : "ROLE_USER")
                         .build();
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());

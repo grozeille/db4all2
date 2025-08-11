@@ -17,6 +17,9 @@ export const api = {
       method: 'GET',
       headers: getAuthHeaders()
     });
+    if (response.status == 401) {
+      window.location.pathname = "/login";
+    }
     if (!response.ok) {
       throw new Error(await response.text());
     }

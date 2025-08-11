@@ -94,8 +94,7 @@ public class UserService {
     }
 
     @Transactional
-    public void changeCurrentUserPassword(String oldPassword, String newPassword, Authentication authentication) {
-        String email = authentication.getName();
+    public void changeCurrentUserPassword(String email, String oldPassword, String newPassword) {
         User user = userRepository.findById(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
@@ -155,5 +154,9 @@ public class UserService {
         );
         RuleResult result = validator.validate(new PasswordData(password));
         return result.isValid();
+    }
+
+    public User findByEmail(String email) {
+        return this.userRepository.findByEmail(email).orElse(null);
     }
 }

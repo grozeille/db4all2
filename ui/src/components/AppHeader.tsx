@@ -26,7 +26,9 @@ export function AppHeader({ onLogout }: { onLogout: () => void }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    userApi.getMe().then(setUser).catch(() => {});
+    userApi.getMe().then(setUser).catch((error) => {
+      console.log(error);
+    });
   }, []);
 
   useEffect(() => {

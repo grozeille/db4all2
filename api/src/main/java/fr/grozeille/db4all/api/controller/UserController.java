@@ -28,6 +28,18 @@ public class UserController {
 
     private final UserService userService;
 
+    @Operation(summary = "Get current user", description = "Get information about the current user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the current user."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content)
+    })
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
+        return ResponseEntity.ok(userService.findByEmail(authentication.getName()));
+    }
+
+
     @Operation(summary = "List all users", description = "Retrieves a complete list of all users. Requires SUPER_ADMIN role.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of users."),
@@ -77,7 +89,7 @@ public class UserController {
     @PutMapping("/password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> updateCurrentUserPassword(@RequestBody UpdatePasswordRequest request, Authentication authentication) {
-        userService.changeCurrentUserPassword(request.getOldPassword(), request.getNewPassword(), authentication);
+        userService.changeCurrentUserPassword(authentication.getName(), request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 
