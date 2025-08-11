@@ -13,7 +13,9 @@ export function AdminPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   useEffect(() => {
-    loadUsers(() => userApi.getAll().then(res => res.data));
+    loadUsers(() => userApi.getAll().then(res => {
+      return res;
+    }));
   }, [loadUsers]);
 
   const handleCreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -26,7 +28,9 @@ export function AdminPage() {
     const result = await execForm(() => userApi.createUser({ login, password, superAdmin }));
     if (result) {
       setShowCreateUser(false);
-      loadUsers(() => userApi.getAll().then(res => res.data));
+      loadUsers(() => userApi.getAll().then(res => {
+        return res;
+      }));
     }
   };
 
@@ -48,7 +52,7 @@ export function AdminPage() {
 
   return <>
     <Container fluid>
-      <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
         <h1 className="h2">Admin</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
           <Button variant="primary" onClick={() => setShowCreateUser(true)}>Create User</Button>
@@ -59,6 +63,8 @@ export function AdminPage() {
 
       {isLoadingUsers && <p>Loading users...</p>}
 
+      {users && users.length === 0 && <p>No users found.</p>}
+      
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -70,7 +76,7 @@ export function AdminPage() {
         <tbody>
         {users && users.map(user => (
           <tr key={user.login}>
-            <td>{user.login}</td>
+            <td>{user.email}</td>
             <td>{user.superAdmin ? 'Yes' : 'No'}</td>
             <td>
               <Button variant="secondary" size="sm" onClick={() => {
