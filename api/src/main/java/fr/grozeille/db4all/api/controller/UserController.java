@@ -12,7 +12,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 @SecurityRequirement(name = "passwordFlow")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -64,15 +67,21 @@ public class UserController {
     @Operation(summary = "Create a new user", description = "Creates a new user with the specified roles. Requires SUPER_ADMIN role.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User created successfully.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request, e.g., user already exists.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request, e.g., user already exists or password is too weak.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden, the current user is not a SUPER_ADMIN.", content = @Content)
     })
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<UserDto> createUser(@RequestBody CreateUserRequest request) {
-        User newUser = userService.createUser(request.getEmail(), request.getPassword(), request.isSuperAdmin());
-        return ResponseEntity.ok(modelMapper.map(newUser, UserDto.class));
+    public ResponseEntity<?> createUser(@RequestBody CreateUserRequest request) {
+        try {
+            User newUser = userService.createUser(request.getEmail(), request.getPassword(), request.isSuperAdmin());
+            return ResponseEntity.ok(modelMapper.map(newUser, UserDto.class));
+        } catch (IllegalArgumentException e) {
+            log.error("Initialization attempt failed: invalid argument.", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @Operation(summary = "Delete a user", description = "Deletes a user by their email. Requires SUPER_ADMIN role.")
@@ -92,14 +101,20 @@ public class UserController {
     @Operation(summary = "Update current user's password", description = "Allows an authenticated user to change their own password.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Password updated successfully."),
-            @ApiResponse(responseCode = "400", description = "Invalid request, e.g., old password does not match.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request, e.g., old password does not match or too weak.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content)
     })
     @PutMapping("/password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> updateCurrentUserPassword(@RequestBody UpdatePasswordRequest request, Authentication authentication) {
-        userService.changeCurrentUserPassword(authentication.getName(), request.getOldPassword(), request.getNewPassword());
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> updateCurrentUserPassword(@RequestBody UpdatePasswordRequest request, Authentication authentication) {
+        try {
+            userService.changeCurrentUserPassword(authentication.getName(), request.getOldPassword(), request.getNewPassword());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Initialization attempt failed: invalid argument.", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @Operation(summary = "Update any user's password by admin", description = "Allows a SUPER_ADMIN to change any user's password. Requires SUPER_ADMIN role.")
@@ -111,9 +126,15 @@ public class UserController {
     })
     @PutMapping("/{email}/password")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<Void> updateUserPassword(@PathVariable String email, @RequestBody AdminUpdatePasswordRequest request) {
-        userService.updateUserPasswordByAdmin(email, request.getNewPassword());
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> updateUserPassword(@PathVariable String email, @RequestBody AdminUpdatePasswordRequest request) {
+        try {
+            userService.updateUserPasswordByAdmin(email, request.getNewPassword());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Initialization attempt failed: invalid argument.", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @Operation(summary = "Update a user's SUPER_ADMIN status", description = "Allows a SUPER_ADMIN to grant or revoke another user's SUPER_ADMIN rights. A user cannot change their own status. Requires SUPER_ADMIN role.")

@@ -1,13 +1,12 @@
 import type { UpdatePasswordRequest, User, UserCreate } from "../types/auth.ts";
 import { api } from "./utils.ts";
-import type { ApiListPage } from "./utils.ts";
 
 export const userApi = {
   getMe: async function() {
     return await api.get<User>("/api/v2/users/me");
   },
   getAll: async function() {
-    return await api.get<ApiListPage<User>>(`/api/v2/users`);
+    return await api.get<User[]>(`/api/v2/users`);
   },
   createUser: async function(user: UserCreate) {
     return await api.post<User>("/api/v2/users", user);

@@ -48,8 +48,3 @@ export const api = {
     return response.json();
   }
 };
-
-export interface ApiListPage<T> {
-  data: T[];
-  total: number;
-}

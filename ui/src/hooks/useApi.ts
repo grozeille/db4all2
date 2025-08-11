@@ -6,11 +6,11 @@ type ApiFunc<T> = (...args: any[]) => Promise<T>;
 
 interface UseApiReturn<T> {
   isLoading: boolean;
-  error: string | null;
+  error: Error | null; // Changed to store the full error object
   data: T | null;
   // The execute function can be called with arguments for the initial apiFunc,
   // or it can be called with a new apiFunc as the first argument.
-  execute: (...args: any[]) => Promise<T>;
+  execute: (...args: any[]) => Promise<T | undefined>; // Return undefined on failure
 }
 
 /**
@@ -21,18 +21,20 @@ interface UseApiReturn<T> {
  */
 export const useApi = <T>(apiFunc?: ApiFunc<T>): UseApiReturn<T> => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null); // Changed to store the full error object
   const [data, setData] = useState<T | null>(null);
 
   const execute = useCallback(
-    async (...args: any[]) => {
+    async (...args: any[]): Promise<T | undefined> => {
       // If the hook was initialized with an apiFunc, use it.
       // Otherwise, the first argument to execute must be the function to call.
       const funcToExecute = apiFunc || args[0];
       const callArgs = apiFunc ? args : args.slice(1);
 
       if (typeof funcToExecute !== 'function') {
-        throw new Error('API function was not provided to useApi hook or its execute method.');
+        const err = new Error('API function was not provided to useApi hook or its execute method.');
+        setError(err);
+        return undefined;
       }
 
       setIsLoading(true);
@@ -42,10 +44,16 @@ export const useApi = <T>(apiFunc?: ApiFunc<T>): UseApiReturn<T> => {
         setData(result);
         return result;
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'An unknown error occurred';
-        setError(errorMessage);
-        throw err;
+        // Store the entire error object so the component can inspect it
+        if (err instanceof Error) {
+          setError(err);
+        } else {
+          // If for some reason a non-Error is thrown, wrap it
+          setError(new Error(String(err)));
+        }
+        // DO NOT re-throw the error. This prevents the "Uncaught (in promise)" crash.
+        // The component will handle the error by observing the `error` state.
+        return undefined;
       } finally {
         setIsLoading(false);
       }

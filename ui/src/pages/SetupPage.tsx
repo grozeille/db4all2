@@ -51,7 +51,7 @@ const SetupPage: React.FC = () => {
     };
 
     // Combine form validation error with API error for display
-    const displayError = formError || apiError;
+    const displayError = formError || (apiError ? apiError.message : null);
 
     return (
         <div className="container mt-5">

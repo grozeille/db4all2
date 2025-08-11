@@ -3,12 +3,12 @@ export interface LoginResponse {
 }
 
 export interface User {
-  login: string;
+  email: string;
   superAdmin: boolean;
 }
 
 export interface UserCreate {
-  login: string;
+  email: string;
   password?: string;
   superAdmin: boolean;
 }

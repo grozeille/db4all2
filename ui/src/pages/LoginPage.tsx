@@ -83,7 +83,7 @@ const LoginPage: React.FC = () => {
                                         disabled={isSubmitting}
                                     />
                                 </div>
-                                {loginError && <div className="alert alert-danger">{loginError}</div>}
+                                {loginError && <div className="alert alert-danger">{loginError.message}</div>}
                                 <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
                                     {isSubmitting ? 'Logging in...' : 'Login'}
                                 </button>
