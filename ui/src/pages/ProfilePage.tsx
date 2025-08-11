@@ -1,4 +1,3 @@
-import { AppHeader } from "../components/AppHeader";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { userApi } from "../services/userApi.ts";

@@ -12,10 +12,10 @@ const SetupPage: React.FC = () => {
     const navigate = useNavigate();
 
     // Hook to check if the application is already set up
-    const { request: performSetupCheck } = useApi(checkInitialization);
+    const { execute: performSetupCheck } = useApi(checkInitialization);
 
     // Hook for the main initialization API call
-    const { loading: isSubmitting, error: apiError, request: performInit } = useApi(initializeApplication);
+    const { isLoading: isSubmitting, error: apiError, execute: performInit } = useApi(initializeApplication);
 
     useEffect(() => {
         performSetupCheck()

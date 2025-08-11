@@ -10,10 +10,10 @@ const LoginPage: React.FC = () => {
     const navigate = useNavigate();
 
     // Hook for the setup check
-    const { loading: isCheckingSetup, request: performSetupCheck } = useApi(checkInitialization);
+    const { isLoading: isCheckingSetup, execute: performSetupCheck } = useApi(checkInitialization);
 
     // Hook for the login submission
-    const { loading: isSubmitting, error: loginError, request: performLogin } = useApi(login);
+    const { isLoading: isSubmitting, error: loginError, execute: performLogin } = useApi(login);
 
     useEffect(() => {
         performSetupCheck()

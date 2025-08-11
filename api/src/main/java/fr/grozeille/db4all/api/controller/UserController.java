@@ -4,6 +4,7 @@ import fr.grozeille.db4all.api.dto.*;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,12 +12,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v2/users")
@@ -27,43 +30,49 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final ModelMapper modelMapper;
 
     @Operation(summary = "Get current user", description = "Get information about the current user.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved the current user."),
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the current user.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content)
     })
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
-        return ResponseEntity.ok(userService.findByEmail(authentication.getName()));
+    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
+        User user = userService.findByEmail(authentication.getName());
+        return ResponseEntity.ok(modelMapper.map(user, UserDto.class));
     }
 
 
     @Operation(summary = "List all users", description = "Retrieves a complete list of all users. Requires SUPER_ADMIN role.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of users."),
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of users.", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserDto.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden, the current user is not a SUPER_ADMIN.", content = @Content)
     })
     @GetMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.findAll());
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<User> users = userService.findAll();
+        List<UserDto> userDtos = users.stream()
+                .map(user -> modelMapper.map(user, UserDto.class))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(userDtos);
     }
 
     @Operation(summary = "Create a new user", description = "Creates a new user with the specified roles. Requires SUPER_ADMIN role.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User created successfully."),
+            @ApiResponse(responseCode = "200", description = "User created successfully.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request, e.g., user already exists.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden, the current user is not a SUPER_ADMIN.", content = @Content)
     })
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<User> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<UserDto> createUser(@RequestBody CreateUserRequest request) {
         User newUser = userService.createUser(request.getEmail(), request.getPassword(), request.isSuperAdmin());
-        return ResponseEntity.ok(newUser);
+        return ResponseEntity.ok(modelMapper.map(newUser, UserDto.class));
     }
 
     @Operation(summary = "Delete a user", description = "Deletes a user by their email. Requires SUPER_ADMIN role.")
@@ -109,7 +118,7 @@ public class UserController {
 
     @Operation(summary = "Update a user's SUPER_ADMIN status", description = "Allows a SUPER_ADMIN to grant or revoke another user's SUPER_ADMIN rights. A user cannot change their own status. Requires SUPER_ADMIN role.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User status updated successfully."),
+            @ApiResponse(responseCode = "200", description = "User status updated successfully.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request, e.g., a user trying to change their own status.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized, a valid JWT token is required.", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden, the current user is not a SUPER_ADMIN.", content = @Content),
@@ -117,8 +126,8 @@ public class UserController {
     })
     @PutMapping("/{email}/superadmin")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<User> updateSuperAdminStatus(@PathVariable String email, @RequestBody UpdateSuperAdminRequest request, Authentication authentication) {
+    public ResponseEntity<UserDto> updateSuperAdminStatus(@PathVariable String email, @RequestBody UpdateSuperAdminRequest request, Authentication authentication) {
         User updatedUser = userService.updateSuperAdminStatus(email, request.isSuperAdmin(), authentication);
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok(modelMapper.map(updatedUser, UserDto.class));
     }
 }

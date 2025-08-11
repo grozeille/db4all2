@@ -1,28 +1,20 @@
-import { AppHeader } from "../components/AppHeader";
 import { useEffect, useState } from "react";
 import { userApi } from "../services/userApi.ts";
 import type { User } from "../types/auth.ts";
 import { Alert, Button, Container, Form, Modal, Table } from "react-bootstrap";
+import { useApi } from "../hooks/useApi.ts";
 
 export function AdminPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [error, setError] = useState('');
+  const { data: users, error: usersError, isLoading: isLoadingUsers, execute: loadUsers } = useApi<User[]>();
+  const { error: formError, isLoading: isSubmitting, execute: execForm } = useApi();
+
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [showUpdatePassword, setShowUpdatePassword] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const loadUsers = async () => {
-    try {
-      const allUsers = await userApi.getAll();
-      setUsers(allUsers.data);
-    } catch (e: any) {
-      setError(e.message);
-    }
-  };
-
   useEffect(() => {
-    loadUsers();
-  }, []);
+    loadUsers(() => userApi.getAll().then(res => res.data));
+  }, [loadUsers]);
 
   const handleCreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,12 +23,10 @@ export function AdminPage() {
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
     const superAdmin = (form.elements.namedItem('superAdmin') as HTMLInputElement).checked;
 
-    try {
-      await userApi.createUser({ login, password, superAdmin });
+    const result = await execForm(() => userApi.createUser({ login, password, superAdmin }));
+    if (result) {
       setShowCreateUser(false);
-      loadUsers();
-    } catch (e: any) {
-      setError(e.message);
+      loadUsers(() => userApi.getAll().then(res => res.data));
     }
   };
 
@@ -46,15 +36,15 @@ export function AdminPage() {
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
 
     if (selectedUser) {
-      try {
-        await userApi.adminUpdatePassword(selectedUser.login, { password });
+      const result = await execForm(() => userApi.adminUpdatePassword(selectedUser.login, { password }));
+      if (result) {
         setShowUpdatePassword(false);
         setSelectedUser(null);
-      } catch (e: any) {
-        setError(e.message);
       }
     }
   };
+
+  const error = usersError || formError;
 
   return <>
     <Container fluid>
@@ -67,6 +57,8 @@ export function AdminPage() {
 
       {error && <Alert variant="danger">{error}</Alert>}
 
+      {isLoadingUsers && <p>Loading users...</p>}
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -76,7 +68,7 @@ export function AdminPage() {
           </tr>
         </thead>
         <tbody>
-        {users.map(user => (
+        {users && users.map(user => (
           <tr key={user.login}>
             <td>{user.login}</td>
             <td>{user.superAdmin ? 'Yes' : 'No'}</td>
@@ -99,19 +91,21 @@ export function AdminPage() {
           <Modal.Body>
             <Form.Group className="mb-3" controlId="login">
               <Form.Label>Login</Form.Label>
-              <Form.Control type="text" required />
+              <Form.Control type="text" required disabled={isSubmitting} />
             </Form.Group>
             <Form.Group className="mb-3" controlId="password">
               <Form.Label>Password</Form.Label>
-              <Form.Control type="password" required />
+              <Form.Control type="password" required disabled={isSubmitting} />
             </Form.Group>
             <Form.Group className="mb-3" controlId="superAdmin">
-              <Form.Check type="checkbox" label="Super Admin" />
+              <Form.Check type="checkbox" label="Super Admin" disabled={isSubmitting} />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowCreateUser(false)}>Cancel</Button>
-            <Button variant="primary" type="submit">Create</Button>
+            <Button variant="secondary" onClick={() => setShowCreateUser(false)} disabled={isSubmitting}>Cancel</Button>
+            <Button variant="primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create'}
+            </Button>
           </Modal.Footer>
         </Form>
       </Modal>
@@ -127,15 +121,17 @@ export function AdminPage() {
           <Modal.Body>
             <Form.Group className="mb-3" controlId="password">
               <Form.Label>New Password</Form.Label>
-              <Form.Control type="password" required />
+              <Form.Control type="password" required disabled={isSubmitting} />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => {
               setShowUpdatePassword(false);
               setSelectedUser(null);
-            }}>Cancel</Button>
-            <Button variant="primary" type="submit">Update</Button>
+            }} disabled={isSubmitting}>Cancel</Button>
+            <Button variant="primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Updating...' : 'Update'}
+            </Button>
           </Modal.Footer>
         </Form>
       </Modal>
