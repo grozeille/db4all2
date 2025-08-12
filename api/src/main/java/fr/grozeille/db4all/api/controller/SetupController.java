@@ -3,6 +3,7 @@ package fr.grozeille.db4all.api.controller;
 import fr.grozeille.db4all.api.dto.LoginRequest;
 import fr.grozeille.db4all.api.dto.ErrorResponse;
 import fr.grozeille.db4all.api.service.UserService;
+import fr.grozeille.db4all.api.exceptions.PasswordTooWeakException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -54,11 +55,10 @@ public class SetupController {
         } catch (IllegalStateException e) {
             log.error("Initialization attempt failed: already initialized.", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("Initialization already done."));
-        } catch (IllegalArgumentException e) {
-            log.error("Initialization attempt failed: invalid argument.", e);
+                    .body(new ErrorResponse("Initialization already done.", ErrorResponse.USER_ALREADY_EXISTS));
+        } catch (PasswordTooWeakException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse(e.getMessage()));
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.PASSWORD_TOO_WEAK));
         }
     }
 }

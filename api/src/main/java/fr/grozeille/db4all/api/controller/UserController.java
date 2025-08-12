@@ -3,6 +3,8 @@ package fr.grozeille.db4all.api.controller;
 import fr.grozeille.db4all.api.dto.*;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.service.UserService;
+import fr.grozeille.db4all.api.exceptions.PasswordTooWeakException;
+import fr.grozeille.db4all.api.exceptions.UserAlreadyExistsException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -77,10 +79,12 @@ public class UserController {
         try {
             User newUser = userService.createUser(request.getEmail(), request.getPassword(), request.isSuperAdmin());
             return ResponseEntity.ok(modelMapper.map(newUser, UserDto.class));
-        } catch (IllegalArgumentException e) {
-            log.error("Initialization attempt failed: invalid argument.", e);
+        } catch (UserAlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse(e.getMessage()));
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.USER_ALREADY_EXISTS));
+        } catch (PasswordTooWeakException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.PASSWORD_TOO_WEAK));
         }
     }
 
@@ -110,10 +114,12 @@ public class UserController {
         try {
             userService.changeCurrentUserPassword(authentication.getName(), request.getOldPassword(), request.getNewPassword());
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            log.error("Initialization attempt failed: invalid argument.", e);
+        } catch (PasswordTooWeakException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse(e.getMessage()));
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.PASSWORD_TOO_WEAK));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage(), null));
         }
     }
 
@@ -130,10 +136,9 @@ public class UserController {
         try {
             userService.updateUserPasswordByAdmin(email, request.getNewPassword());
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            log.error("Initialization attempt failed: invalid argument.", e);
+        } catch (PasswordTooWeakException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse(e.getMessage()));
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.PASSWORD_TOO_WEAK));
         }
     }
 

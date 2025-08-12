@@ -1,11 +1,12 @@
 package fr.grozeille.db4all.api.service;
 
+import fr.grozeille.db4all.api.exceptions.PasswordTooWeakException;
+import fr.grozeille.db4all.api.exceptions.UserAlreadyExistsException;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.passay.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,16 +39,18 @@ public class UserService {
         return Optional.of(user);
     }
 
-    private void validateUserCredentials(String email, String password) {
+    private void validateEmail(String email) {
         // Rule: The email must be a valid email address.
         final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9\\.-]+\\.[a-zA-Z]{2,6}$";
         if (email == null || !email.matches(EMAIL_REGEX)) {
             throw new IllegalArgumentException("Invalid email format. Please use a valid email address.");
         }
+    }
 
+    private void validatePassword(String password) {
         // Rule: Password must be strong.
         if (!isPasswordStrong(password)) {
-            throw new IllegalArgumentException("Password is not strong enough.");
+            throw new PasswordTooWeakException("Password is not strong enough.");
         }
     }
 
@@ -56,7 +59,12 @@ public class UserService {
         if (isInitialized()) {
             throw new IllegalStateException("Initialization already done.");
         }
-        validateUserCredentials(email, password);
+        validateEmail(email);
+        validatePassword(password);
+
+        if (userRepository.existsById(email)) {
+            throw new UserAlreadyExistsException("User with this email already exists.");
+        }
 
         User user = new User();
         user.setEmail(email);
@@ -72,10 +80,11 @@ public class UserService {
 
     @Transactional
     public User createUser(String email, String password, boolean isSuperAdmin) {
-        validateUserCredentials(email, password);
+        validateEmail(email);
+        validatePassword(password);
 
         if (userRepository.existsById(email)) {
-            throw new IllegalArgumentException("User with this email already exists.");
+            throw new UserAlreadyExistsException("User with this email already exists.");
         }
 
         User user = new User();
@@ -88,7 +97,7 @@ public class UserService {
     @Transactional
     public void deleteUser(String email) {
         if (!userRepository.existsById(email)) {
-            throw new UsernameNotFoundException("User not found with email: " + email);
+            throw new IllegalArgumentException("User not found with email: " + email);
         }
         userRepository.deleteById(email);
     }
@@ -96,15 +105,13 @@ public class UserService {
     @Transactional
     public void changeCurrentUserPassword(String email, String oldPassword, String newPassword) {
         User user = userRepository.findById(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
 
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             throw new IllegalArgumentException("Incorrect old password.");
         }
 
-        if (!isPasswordStrong(newPassword)) {
-            throw new IllegalArgumentException("New password is not strong enough.");
-        }
+        validatePassword(newPassword);
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
@@ -113,11 +120,9 @@ public class UserService {
     @Transactional
     public void updateUserPasswordByAdmin(String email, String newPassword) {
         User user = userRepository.findById(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
 
-        if (!isPasswordStrong(newPassword)) {
-            throw new IllegalArgumentException("New password is not strong enough.");
-        }
+        validatePassword(newPassword);
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
@@ -131,7 +136,7 @@ public class UserService {
         }
 
         User user = userRepository.findById(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
         user.setSuperAdmin(superAdmin);
         return userRepository.save(user);
