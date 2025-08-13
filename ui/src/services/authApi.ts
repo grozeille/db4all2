@@ -1,4 +1,5 @@
 import type { LoginResponse } from '../types/auth';
+import { ApiError } from './utils';
 
 const API_URL = '/api/v2/auth';
 
@@ -16,16 +17,18 @@ export async function login(username: string, password: string):Promise<LoginRes
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('Invalid credentials');
+    let errorMessage: string;
+    switch (response.status) {
+      case 404:
+        errorMessage = "This user doesn't exist";
+        break;
+      case 401:
+        errorMessage = "Invalid credentials";
+        break;
+      default:
+        errorMessage = 'Login failed with status: ' + response.status;
     }
-    // Try to parse the error response, but fallback to a generic error
-    try {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Login failed');
-    } catch (e) {
-      throw new Error('Login failed with status: ' + response.status);
-    }
+    throw new ApiError(errorMessage, response.status);
   }
 
   return response.json();
