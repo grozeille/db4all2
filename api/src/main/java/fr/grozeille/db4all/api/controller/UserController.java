@@ -138,7 +138,7 @@ public class UserController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> updateUserPassword(@PathVariable String email, @RequestBody AdminUpdatePasswordRequest request) {
         try {
-            userService.updateUserPasswordByAdmin(email, request.getNewPassword());
+            userService.updateUserPasswordByAdmin(email, request.getPassword());
             return ResponseEntity.noContent().build();
         } catch (PasswordTooWeakException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

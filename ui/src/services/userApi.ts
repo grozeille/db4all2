@@ -8,11 +8,11 @@ export const userApi = {
   getAll: async function() {
     return await api.get<User[]>(`/api/v2/users`);
   },
-  createUser: async function(user: UserCreate) {
+  createUser: async function(user: UserCreate): Promise<User | boolean> {
     return await api.post<User>("/api/v2/users", user);
   },
-  adminUpdatePassword: async function(login: string, request: UpdatePasswordRequest) {
-    return await api.put<void>(`/api/v2/users/${login}/password`, request);
+  adminUpdatePassword: async function(login: string, request: UpdatePasswordRequest): Promise<boolean> {
+    return await api.put<void>(`/api/v2/users/${login}/password`, request) as boolean;
   },
   updateMyPassword: async function(request: UpdatePasswordRequest) {
     return await api.put<void>("/api/v2/users/password", request);

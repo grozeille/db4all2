@@ -10,10 +10,13 @@ export function AdminPage() {
   // Hooks for the create user form
   const { error: createUserHookError, isLoading: isCreatingUser, execute: execCreateUser } = useApi();
   const [createUserApiError, setCreateUserApiError] = useState<string | null>(null);
+  const [createLoginApiError, setCreateLoginApiError] = useState<string | null>(null);
+  const [createUserGeneralApiError, setCreateUserGeneralApiError] = useState<string | null>(null);
 
   // Hooks for the update password form
   const { error: updatePasswordHookError, isLoading: isUpdatingPassword, execute: execUpdatePassword } = useApi();
   const [updatePasswordApiError, setUpdatePasswordApiError] = useState<string | null>(null);
+  const [updatePasswordGeneralApiError, setUpdatePasswordGeneralApiError] = useState<string | null>(null);
 
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [showUpdatePassword, setShowUpdatePassword] = useState(false);
@@ -37,19 +40,53 @@ export function AdminPage() {
 
   // Show API error for create user form
   useEffect(() => {
-    if (createUserHookError?.message?.includes("is not strong enough")) {
-      setCreateUserApiError("Password is too weak");
+    if (createUserHookError?.message) {
+      try {
+        const errorData = JSON.parse(createUserHookError.message);
+        if (errorData.errorType === "USER_ALREADY_EXISTS") {
+          setCreateLoginApiError("This login already exists");
+          setCreateUserApiError(null); // Clear password field error
+          setCreateUserGeneralApiError(null); // Clear general alert
+        } else if (errorData.errorType === "PASSWORD_TOO_WEAK") {
+          setCreateUserApiError("The password is not strong enough.");
+          setCreateLoginApiError(null); // Clear login field error
+          setCreateUserGeneralApiError(null); // No general alert for password too weak
+        } else {
+          setCreateUserApiError(null); // Clear field-specific error
+          setCreateLoginApiError(null); // Clear login field error
+          setCreateUserGeneralApiError("Unexpected error"); // Set general alert for other errors
+        }
+      } catch (e) {
+        setCreateUserApiError(null); // Clear field-specific error
+        setCreateLoginApiError(null); // Clear login field error
+        setCreateUserGeneralApiError("Unexpected error"); // Set general alert for unexpected parsing errors
+      }
     } else {
       setCreateUserApiError(null);
+      setCreateLoginApiError(null);
+      setCreateUserGeneralApiError(null);
     }
   }, [createUserHookError]);
 
   // Show API error for update password form
   useEffect(() => {
-    if (updatePasswordHookError?.message?.includes("is not strong enough")) {
-      setUpdatePasswordApiError("Password is too weak");
+    if (updatePasswordHookError?.message) {
+      try {
+        const errorData = JSON.parse(updatePasswordHookError.message);
+        if (errorData.errorType === "PASSWORD_TOO_WEAK") {
+          setUpdatePasswordApiError("The password is not strong enough.");
+          setUpdatePasswordGeneralApiError(null); // No general alert for password too weak
+        } else {
+          setUpdatePasswordApiError(null); // Clear field-specific error
+          setUpdatePasswordGeneralApiError("Unexpected error"); // Set general alert for other errors
+        }
+      } catch (e) {
+        setUpdatePasswordApiError(null); // Clear field-specific error
+        setUpdatePasswordGeneralApiError("Unexpected error"); // Set general alert for unexpected parsing errors
+      }
     } else {
       setUpdatePasswordApiError(null);
+      setUpdatePasswordGeneralApiError(null);
     }
   }, [updatePasswordHookError]);
 
@@ -94,6 +131,7 @@ export function AdminPage() {
     setSuperAdmin(false);
     setPasswordMismatch(false);
     setCreateUserApiError(null);
+    setCreateLoginApiError(null); // Clear login error
   }
 
   const handleUpdatePassword = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -106,7 +144,7 @@ export function AdminPage() {
     if (selectedUser) {
       setUpdatePasswordApiError(null);
       const result = await execUpdatePassword(() => userApi.adminUpdatePassword(selectedUser.email, { password: newPassword }));
-      if (result) {
+      if (result !== undefined) {
         setShowUpdatePassword(false);
         resetUpdatePasswordForm();
       }
@@ -121,9 +159,7 @@ export function AdminPage() {
     setUpdatePasswordApiError(null);
   }
 
-  const genericCreateError = createUserHookError && !createUserHookError.message?.includes("is not strong enough") ? createUserHookError.message : null;
-  const genericUpdateError = updatePasswordHookError && !updatePasswordHookError.message?.includes("is not strong enough") ? updatePasswordHookError.message : null;
-  const error = usersError?.message || genericCreateError || genericUpdateError;
+  const error = usersError?.message;
 
   return <>
     <Container fluid>
@@ -173,9 +209,13 @@ export function AdminPage() {
         </Modal.Header>
         <Form onSubmit={handleCreateUser}>
           <Modal.Body>
+            {createUserGeneralApiError && <Alert variant="danger">{createUserGeneralApiError}</Alert>}
             <Form.Group className="mb-3" controlId="email">
               <Form.Label>Login</Form.Label>
-              <Form.Control type="email" required disabled={isCreatingUser} value={email} onChange={e => setEmail(e.target.value)} />
+              <Form.Control type="email" required disabled={isCreatingUser} value={email} onChange={e => setEmail(e.target.value)} isInvalid={!!createLoginApiError} />
+              <Form.Control.Feedback type="invalid">
+                {createLoginApiError}
+              </Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-3" controlId="password">
               <Form.Label>Password</Form.Label>
@@ -219,6 +259,7 @@ export function AdminPage() {
         </Modal.Header>
         <Form onSubmit={handleUpdatePassword}>
           <Modal.Body>
+            {updatePasswordGeneralApiError && <Alert variant="danger">{updatePasswordGeneralApiError}</Alert>}
             <Form.Group className="mb-3" controlId="newPassword">
               <Form.Label>New Password</Form.Label>
               <Form.Control type="password" required disabled={isUpdatingPassword} value={newPassword} onChange={e => {
@@ -252,3 +293,4 @@ export function AdminPage() {
     </Container>
   </>;
 }
+

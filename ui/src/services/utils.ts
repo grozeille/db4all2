@@ -35,7 +35,7 @@ export const api = {
     }
     return response.json();
   },
-  post: async function<T>(url: string, data: any): Promise<T> {
+  post: async function<T>(url: string, data: any): Promise<T | boolean> {
     const response = await fetch(url, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -44,9 +44,12 @@ export const api = {
     if (!response.ok) {
       throw new Error(await response.text());
     }
+    if (response.status === 204) {
+      return true; // Return true for success with no content
+    }
     return response.json();
   },
-  put: async function<T>(url: string, data: any): Promise<T> {
+  put: async function<T>(url: string, data: any): Promise<T | boolean> {
     const response = await fetch(url, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -54,6 +57,9 @@ export const api = {
     });
     if (!response.ok) {
       throw new Error(await response.text());
+    }
+    if (response.status === 204) {
+      return true; // Return true for success with no content
     }
     return response.json();
   }

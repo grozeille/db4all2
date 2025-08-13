@@ -8,5 +8,5 @@ import lombok.Data;
 @Builder
 public class AdminUpdatePasswordRequest {
     @Schema(description = "The new password for the user.", format = "password", required = true)
-    private String newPassword;
+    private String password;
 }
