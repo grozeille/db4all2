@@ -5,6 +5,7 @@ import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.service.UserService;
 import fr.grozeille.db4all.api.exceptions.PasswordTooWeakException;
 import fr.grozeille.db4all.api.exceptions.UserAlreadyExistsException;
+import fr.grozeille.db4all.api.exceptions.WrongPasswordException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -117,6 +118,9 @@ public class UserController {
         } catch (PasswordTooWeakException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse(e.getMessage(), ErrorResponse.PASSWORD_TOO_WEAK));
+        } catch (WrongPasswordException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.WRONG_PASSWORD));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse(e.getMessage(), null));

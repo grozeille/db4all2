@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class UserAlreadyExistsException extends IllegalArgumentException {
-    public UserAlreadyExistsException(String email) {
-        super("The user "+email+" already exists.");
+public class WrongPasswordException extends IllegalArgumentException {
+    public WrongPasswordException() {
+        super("The password is wrong");
     }
 }

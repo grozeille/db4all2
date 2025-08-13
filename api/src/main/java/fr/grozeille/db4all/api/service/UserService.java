@@ -2,10 +2,15 @@ package fr.grozeille.db4all.api.service;
 
 import fr.grozeille.db4all.api.exceptions.PasswordTooWeakException;
 import fr.grozeille.db4all.api.exceptions.UserAlreadyExistsException;
+import fr.grozeille.db4all.api.exceptions.UserNotFoundException;
+import fr.grozeille.db4all.api.exceptions.WrongPasswordException;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.logging.log4j.util.Strings;
 import org.passay.*;
+import org.passay.CharacterData;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,16 +32,16 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> authenticate(String username, String password) {
+    public User authenticate(String username, String password) {
         Optional<User> userOpt = userRepository.findByEmail(username);
         if (userOpt.isEmpty()) {
-            return Optional.empty();
+            throw new UserNotFoundException(username);
         }
         User user = userOpt.get();
         if (password == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
-            return Optional.empty();
+            throw new WrongPasswordException();
         }
-        return Optional.of(user);
+        return user;
     }
 
     private void validateEmail(String email) {
@@ -49,8 +54,26 @@ public class UserService {
 
     private void validatePassword(String password) {
         // Rule: Password must be strong.
-        if (!isPasswordStrong(password)) {
-            throw new PasswordTooWeakException("Password is not strong enough.");
+        if (password == null) throw new PasswordTooWeakException("Password cannot be null.");
+        PasswordValidator validator = new PasswordValidator(
+            new LengthRule(8, 64),
+            new CharacterRule(EnglishCharacterData.UpperCase, 1),
+            new CharacterRule(EnglishCharacterData.LowerCase, 1),
+            new CharacterRule(
+                new CharacterData() {
+                    public String getErrorCode() { return "INSUFFICIENT_DIGIT_OR_SPECIAL"; }
+                    public String getCharacters() {
+                        return EnglishCharacterData.Digit.getCharacters() + EnglishCharacterData.Special.getCharacters();
+                    }
+                }, 1
+            )
+        );
+        
+        RuleResult result = validator.validate(new PasswordData(password));
+        
+        if(!result.isValid()) {
+            throw new PasswordTooWeakException("The password is not strong enough: \n" + 
+                Strings.join(validator.getMessages(result), '\n'));
         }
     }
 
@@ -63,7 +86,7 @@ public class UserService {
         validatePassword(password);
 
         if (userRepository.existsById(email)) {
-            throw new UserAlreadyExistsException("User with this email already exists.");
+            throw new UserAlreadyExistsException(email);
         }
 
         User user = new User();
@@ -84,7 +107,7 @@ public class UserService {
         validatePassword(password);
 
         if (userRepository.existsById(email)) {
-            throw new UserAlreadyExistsException("User with this email already exists.");
+            throw new UserAlreadyExistsException(email);
         }
 
         User user = new User();
@@ -97,7 +120,7 @@ public class UserService {
     @Transactional
     public void deleteUser(String email) {
         if (!userRepository.existsById(email)) {
-            throw new IllegalArgumentException("User not found with email: " + email);
+            throw new UserNotFoundException(email);
         }
         userRepository.deleteById(email);
     }
@@ -105,10 +128,10 @@ public class UserService {
     @Transactional
     public void changeCurrentUserPassword(String email, String oldPassword, String newPassword) {
         User user = userRepository.findById(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
-            throw new IllegalArgumentException("Incorrect old password.");
+            throw new WrongPasswordException();
         }
 
         validatePassword(newPassword);
@@ -120,7 +143,7 @@ public class UserService {
     @Transactional
     public void updateUserPasswordByAdmin(String email, String newPassword) {
         User user = userRepository.findById(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         validatePassword(newPassword);
 
@@ -136,29 +159,10 @@ public class UserService {
         }
 
         User user = userRepository.findById(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         user.setSuperAdmin(superAdmin);
         return userRepository.save(user);
-    }
-
-    private boolean isPasswordStrong(String password) {
-        if (password == null) return false;
-        PasswordValidator validator = new PasswordValidator(
-            new LengthRule(8, 64),
-            new CharacterRule(EnglishCharacterData.UpperCase, 1),
-            new CharacterRule(EnglishCharacterData.LowerCase, 1),
-            new CharacterRule(
-                new CharacterData() {
-                    public String getErrorCode() { return "INSUFFICIENT_DIGIT_OR_SPECIAL"; }
-                    public String getCharacters() {
-                        return EnglishCharacterData.Digit.getCharacters() + EnglishCharacterData.Special.getCharacters();
-                    }
-                }, 1
-            )
-        );
-        RuleResult result = validator.validate(new PasswordData(password));
-        return result.isValid();
     }
 
     public User findByEmail(String email) {

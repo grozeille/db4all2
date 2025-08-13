@@ -6,6 +6,7 @@ import lombok.Data;
 public class ErrorResponse {
     public static final String USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
     public static final String PASSWORD_TOO_WEAK = "PASSWORD_TOO_WEAK";
+    public static final String WRONG_PASSWORD = "WRONG_PASSWORD";
     public static final String UNDEFINED = "UNDEFINED";
 
     private final String message;

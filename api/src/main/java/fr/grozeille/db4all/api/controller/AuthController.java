@@ -2,6 +2,8 @@ package fr.grozeille.db4all.api.controller;
 
 import fr.grozeille.db4all.api.dto.LoginRequest;
 import fr.grozeille.db4all.api.dto.LoginResponse;
+import fr.grozeille.db4all.api.exceptions.UserNotFoundException;
+import fr.grozeille.db4all.api.exceptions.WrongPasswordException;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.dto.ErrorResponse;
 import fr.grozeille.db4all.api.security.JwtUtil;
@@ -19,7 +21,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v2/auth")
@@ -40,15 +41,17 @@ public class AuthController {
     })
     @PostMapping(value = "/login", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseEntity<?> login(@ModelAttribute LoginRequest request) {
-        Optional<User> userOpt = userService.authenticate(request.getUsername(), request.getPassword());
+        try {
+            User user = userService.authenticate(request.getUsername(), request.getPassword());
 
-        if (userOpt.isEmpty()) {
+            String token = jwtUtil.generateToken(user.getEmail(), user.isSuperAdmin());
+            return ResponseEntity.ok(new LoginResponse(token, user.getEmail()));
+        } catch (WrongPasswordException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("Invalid credentials."));
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.WRONG_PASSWORD));
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse(e.getMessage()));
         }
-
-        User user = userOpt.get();
-        String token = jwtUtil.generateToken(user.getEmail(), user.isSuperAdmin());
-        return ResponseEntity.ok(new LoginResponse(token, user.getEmail()));
     }
 }
