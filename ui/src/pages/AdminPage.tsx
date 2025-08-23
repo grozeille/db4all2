@@ -18,8 +18,13 @@ export function AdminPage() {
   const [updatePasswordApiError, setUpdatePasswordApiError] = useState<string | null>(null);
   const [updatePasswordGeneralApiError, setUpdatePasswordGeneralApiError] = useState<string | null>(null);
 
+  // Hooks for the update role form
+  const { error: updateRoleHookError, isLoading: isUpdatingRole, execute: execUpdateRole } = useApi();
+  const [updateRoleGeneralApiError, setUpdateRoleGeneralApiError] = useState<string | null>(null);
+
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [showUpdatePassword, setShowUpdatePassword] = useState(false);
+  const [showChangeRole, setShowChangeRole] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // State for the create user form
@@ -33,6 +38,9 @@ export function AdminPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [newPasswordMismatch, setNewPasswordMismatch] = useState(false);
+
+  // State for the update role form
+  const [newRole, setNewRole] = useState<'user' | 'superAdmin'>('user');
 
   useEffect(() => {
     loadUsers();
@@ -108,6 +116,45 @@ export function AdminPage() {
       setNewPasswordMismatch(false);
     }
   }, [newPassword, confirmNewPassword]);
+
+  const handleChangeRole = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (selectedUser) {
+      setUpdateRoleGeneralApiError(null);
+      const result = await execUpdateRole(() => userApi.updateSuperAdminStatus(selectedUser.email, newRole === 'superAdmin'));
+      if (result !== undefined) {
+        setShowChangeRole(false);
+        resetChangeRoleForm();
+        loadUsers(); // Reload users to reflect role change
+      }
+    }
+  };
+
+  const resetChangeRoleForm = () => {
+    setSelectedUser(null);
+    setNewRole('user');
+    setUpdateRoleGeneralApiError(null);
+  };
+
+  // Show API error for update role form
+  useEffect(() => {
+    if (updateRoleHookError?.message) {
+      try {
+        const errorData = JSON.parse(updateRoleHookError.message);
+        if (errorData.errorType === "USER_NOT_FOUND") {
+          setUpdateRoleGeneralApiError("User not found.");
+        } else if (errorData.errorType === "SELF_STATUS_CHANGE_FORBIDDEN") {
+          setUpdateRoleGeneralApiError("You cannot change your own role.");
+        } else {
+          setUpdateRoleGeneralApiError("Unexpected error");
+        }
+      } catch (e) {
+        setUpdateRoleGeneralApiError("Unexpected error");
+      }
+    } else {
+      setUpdateRoleGeneralApiError(null);
+    }
+  }, [updateRoleHookError]);
 
   const handleCreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -194,6 +241,12 @@ export function AdminPage() {
                 setSelectedUser(user);
                 setShowUpdatePassword(true);
               }}>Change Password</Button>
+              {' '}
+              <Button variant="secondary" size="sm" onClick={() => {
+                setSelectedUser(user);
+                setNewRole(user.superAdmin ? 'superAdmin' : 'user'); // Set initial role based on user
+                setShowChangeRole(true);
+              }}>Change Role</Button>
             </td>
           </tr>
         ))}
@@ -285,6 +338,40 @@ export function AdminPage() {
             }} disabled={isUpdatingPassword}>Cancel</Button>
             <Button variant="primary" type="submit" disabled={isUpdatingPassword || newPasswordMismatch}>
               {isUpdatingPassword ? 'Updating...' : 'Update'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      <Modal show={showChangeRole} onHide={() => {
+        setShowChangeRole(false);
+        resetChangeRoleForm();
+      }}>
+        <Modal.Header closeButton>
+          <Modal.Title>Change Role for {selectedUser?.email}</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleChangeRole}>
+          <Modal.Body>
+            {updateRoleGeneralApiError && <Alert variant="danger">{updateRoleGeneralApiError}</Alert>}
+            <Form.Group className="mb-3" controlId="userRole">
+              <Form.Label>Select Role</Form.Label>
+              <Form.Select
+                value={newRole}
+                onChange={e => setNewRole(e.target.value as 'user' | 'superAdmin')}
+                disabled={isUpdatingRole}
+              >
+                <option value="user">User</option>
+                <option value="superAdmin">Super Admin</option>
+              </Form.Select>
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => {
+              setShowChangeRole(false);
+              resetChangeRoleForm();
+            }} disabled={isUpdatingRole}>Cancel</Button>
+            <Button variant="primary" type="submit" disabled={isUpdatingRole}>
+              {isUpdatingRole ? 'Updating...' : 'Update Role'}
             </Button>
           </Modal.Footer>
         </Form>

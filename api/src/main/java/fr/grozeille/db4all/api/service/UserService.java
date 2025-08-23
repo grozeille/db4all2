@@ -3,6 +3,7 @@ package fr.grozeille.db4all.api.service;
 import fr.grozeille.db4all.api.exceptions.PasswordTooWeakException;
 import fr.grozeille.db4all.api.exceptions.UserAlreadyExistsException;
 import fr.grozeille.db4all.api.exceptions.UserNotFoundException;
+import fr.grozeille.db4all.api.exceptions.SelfStatusChangeForbiddenException;
 import fr.grozeille.db4all.api.exceptions.WrongPasswordException;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.repository.UserRepository;
@@ -72,7 +73,7 @@ public class UserService {
         RuleResult result = validator.validate(new PasswordData(password));
         
         if(!result.isValid()) {
-            throw new PasswordTooWeakException("The password is not strong enough: \n" + 
+            throw new PasswordTooWeakException("The password is not strong enough: \n" +
                 Strings.join(validator.getMessages(result), '\n'));
         }
     }
@@ -155,7 +156,7 @@ public class UserService {
     public User updateSuperAdminStatus(String email, boolean superAdmin, Authentication authentication) {
         // Rule: A user cannot change their own superAdmin status.
         if (authentication.getName().equals(email)) {
-            throw new IllegalArgumentException("A user cannot change their own superAdmin status to prevent accidental lock-out.");
+            throw new SelfStatusChangeForbiddenException("A user cannot change their own superAdmin status to prevent accidental lock-out.");
         }
 
         User user = userRepository.findById(email)

@@ -157,7 +157,15 @@ public class UserController {
     @PutMapping("/{email}/superadmin")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<UserDto> updateSuperAdminStatus(@PathVariable String email, @RequestBody UpdateSuperAdminRequest request, Authentication authentication) {
-        User updatedUser = userService.updateSuperAdminStatus(email, request.isSuperAdmin(), authentication);
-        return ResponseEntity.ok(modelMapper.map(updatedUser, UserDto.class));
+        try {
+            User updatedUser = userService.updateSuperAdminStatus(email, request.isSuperAdmin(), authentication);
+            return ResponseEntity.ok(modelMapper.map(updatedUser, UserDto.class));
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.USER_NOT_FOUND));
+        } catch (SelfStatusChangeForbiddenException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage(), ErrorResponse.SELF_STATUS_CHANGE_FORBIDDEN));
+        }
     }
 }
