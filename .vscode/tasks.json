@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "API: Maven test-compile",
+            "type": "shell",
+            "command": "mvn",
+            "args": [
+                "-f",
+                "api/pom.xml",
+                "test-compile"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "API: Spring Boot run",
+            "type": "shell",
+            "command": "mvn",
+            "args": [
+                "-f",
+                "api/pom.xml",
+                "spring-boot:run"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

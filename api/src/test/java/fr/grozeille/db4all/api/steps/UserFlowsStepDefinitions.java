@@ -98,7 +98,7 @@ public class UserFlowsStepDefinitions {
     @When("I, as an admin, change the password for {string} to {string}")
     public void iChangeThePassword(String email, String newPassword) throws Exception {
         AdminUpdatePasswordRequest request = AdminUpdatePasswordRequest.builder()
-                .newPassword(newPassword)
+            .password(newPassword)
                 .build();
 
         lastResult = mockMvc.perform(put("/api/v2/users/" + email + "/password")
