@@ -14,6 +14,47 @@
             "problemMatcher": []
         },
         {
+            "label": "UI: npm dev",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "dev"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/ui"
+            },
+            "isBackground": true,
+            "group": "build",
+            "problemMatcher": {
+                "owner": "custom",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*)$",
+                    "message": 1
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*vite.*",
+                    "endsPattern": ".*ready in.*"
+                }
+            }
+        },
+        {
+            "label": "UI: npm build",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/ui"
+            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
             "label": "API: Spring Boot run",
             "type": "shell",
             "command": "mvn",
@@ -26,6 +67,31 @@
                 "kind": "build",
                 "isDefault": true
             },
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": {
+                "owner": "custom",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*)$",
+                    "message": 1
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*spring-boot:run.*|.*Starting .* using Java.*",
+                    "endsPattern": ".*Started .* in .* seconds.*"
+                }
+            }
+        },
+        {
+            "label": "Dev: Full stack run",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "API: Spring Boot run",
+                "UI: npm dev"
+            ],
             "problemMatcher": []
         }
     ]

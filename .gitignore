@@ -30,3 +30,4 @@ api/target
 
 api-docs.json
 *.mv.db
+.data/

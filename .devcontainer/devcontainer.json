@@ -1,0 +1,57 @@
+{
+    "name": "db4all2",
+    "image": "mcr.microsoft.com/devcontainers/universal:2",
+    "containerEnv": {
+        "SERVER_PORT": "8080",
+        "SPRING_DATASOURCE_URL": "jdbc:h2:file:/workspaces/db4all2/.data/db4all;DB_CLOSE_DELAY=-1",
+        "SPRING_DATASOURCE_DRIVER_CLASS_NAME": "org.h2.Driver",
+        "SPRING_DATASOURCE_USERNAME": "sa",
+        "SPRING_DATASOURCE_PASSWORD": "",
+        "LOGGING_LEVEL_ROOT": "INFO",
+        "LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB": "INFO",
+        "LOGGING_LEVEL_ORG_HIBERNATE_SQL": "DEBUG",
+        "VITE_PORT": "5173",
+        "VITE_API_PROXY_TARGET": "http://127.0.0.1:8080"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/java:1": {
+            "version": "21"
+        },
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "22"
+        }
+    },
+    "forwardPorts": [8080, 5173],
+    "portsAttributes": {
+        "8080": {
+            "label": "Spring Boot API",
+            "onAutoForward": "notify",
+            "requireLocalPort": true
+        },
+        "5173": {
+            "label": "Vite UI",
+            "onAutoForward": "openPreview",
+            "requireLocalPort": true
+        }
+    },
+    "postCreateCommand": {
+        "api-dependencies": "mkdir -p /workspaces/db4all2/.data && mvn -f api/pom.xml -DskipTests test-compile",
+        "ui-dependencies": "npm --prefix ui ci"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "vscjava.vscode-java-pack",
+                "redhat.vscode-xml",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "GitHub.copilot",
+                "GitHub.copilot-chat"
+            ],
+            "settings": {
+                "java.configuration.updateBuildConfiguration": "interactive",
+                "js/ts.tsdk.path": "ui/node_modules/typescript/lib"
+            }
+        }
+    }
+}
