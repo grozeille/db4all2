@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useMatch } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getProject } from '../services/projectApi';
 import { getTable } from '../services/tableApi';
@@ -19,8 +19,23 @@ export function AppHeader({ onLogout }: { onLogout: () => void }) {
 
   // Breadcrumb dynamique
   const location = useLocation();
-  const params = useParams();
-  const pathnames = location.pathname.split('/').filter(Boolean);
+  const projectListMatch = useMatch('/projects');
+  const projectNewMatch = useMatch('/projects/new');
+  const projectSettingsMatch = useMatch('/projects/:projectId/settings');
+  const projectTablesMatch = useMatch('/projects/:projectId/tables');
+  const tableNewMatch = useMatch('/projects/:projectId/tables/new');
+  const tableContentMatch = useMatch('/projects/:projectId/tables/:tableId/content');
+  const tableSettingsMatch = useMatch('/projects/:projectId/tables/:tableId/settings');
+  const routeProjectId = projectSettingsMatch?.params.projectId
+    || projectTablesMatch?.params.projectId
+    || tableNewMatch?.params.projectId
+    || tableContentMatch?.params.projectId
+    || tableSettingsMatch?.params.projectId
+    || null;
+  const routeTableId = tableContentMatch?.params.tableId
+    || tableSettingsMatch?.params.tableId
+    || null;
+  const navigationState = location.state as { projectName?: string; tableName?: string } | null;
   const [projectName, setProjectName] = useState<string | null>(null);
   const [tableName, setTableName] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -32,43 +47,69 @@ export function AppHeader({ onLogout }: { onLogout: () => void }) {
   }, []);
 
   useEffect(() => {
-    if (params.projectId) {
-      getProject(params.projectId).then(p => setProjectName(p.name)).catch(() => setProjectName(null));
+    if (navigationState?.projectName) {
+      setProjectName(navigationState.projectName);
+    }
+
+    if (routeProjectId) {
+      getProject(routeProjectId).then(p => setProjectName(p.name)).catch(() => setProjectName(navigationState?.projectName ?? null));
     } else {
       setProjectName(null);
     }
-    if (params.projectId && params.tableId) {
-      getTable(params.projectId, params.tableId).then(t => setTableName(t.name)).catch(() => setTableName(null));
+
+    if (navigationState?.tableName) {
+      setTableName(navigationState.tableName);
+    }
+
+    if (routeProjectId && routeTableId) {
+      getTable(routeProjectId, routeTableId).then(t => setTableName(t.name)).catch(() => setTableName(navigationState?.tableName ?? null));
     } else {
       setTableName(null);
     }
-  }, [params.projectId, params.tableId]);
+  }, [navigationState?.projectName, navigationState?.tableName, routeProjectId, routeTableId]);
 
   function getBreadcrumbs() {
     const crumbs = [
       { name: 'Projects', href: '/projects' }
     ];
-    if (pathnames.length > 1) {
-      if (pathnames[1] === 'new') {
-        crumbs.push({ name: 'New project', href: location.pathname });
-      } else if (pathnames[1]) {
-        // Projet
-        crumbs.push({ name: projectName || '', href: `/projects/${params.projectId}/tables` });
-        if (pathnames[2] === 'settings') {
-          crumbs.push({ name: 'Settings', href: location.pathname });
-        } else if (pathnames[2] === 'tables') {
-          if (pathnames[3] === 'new') {
-            crumbs.push({ name: 'New table', href: location.pathname });
-          } else if (pathnames[3]) {
-            // Table
-            crumbs.push({ name: tableName || '', href: `/projects/${params.projectId}/tables/${params.tableId}` });
-            if (pathnames[4] === 'settings') {
-              crumbs.push({ name: 'Settings', href: location.pathname });
-            }
-          }
-        }
-      }
+    if (projectListMatch) {
+      return crumbs;
     }
+
+    if (projectNewMatch) {
+      crumbs.push({ name: 'New project', href: location.pathname });
+      return crumbs;
+    }
+
+    if (routeProjectId) {
+      crumbs.push({ name: projectName || routeProjectId, href: `/projects/${routeProjectId}/tables` });
+    }
+
+    if (projectSettingsMatch) {
+      crumbs.push({ name: 'Settings', href: location.pathname });
+      return crumbs;
+    }
+
+    if (projectTablesMatch) {
+      crumbs.push({ name: 'Tables', href: location.pathname });
+      return crumbs;
+    }
+
+    if (tableNewMatch) {
+      crumbs.push({ name: 'Tables', href: `/projects/${routeProjectId}/tables` });
+      crumbs.push({ name: 'New table', href: location.pathname });
+      return crumbs;
+    }
+
+    if (routeProjectId && routeTableId) {
+      crumbs.push({ name: 'Tables', href: `/projects/${routeProjectId}/tables` });
+      crumbs.push({ name: tableName || routeTableId, href: `/projects/${routeProjectId}/tables/${routeTableId}/content` });
+    }
+
+    if (tableSettingsMatch) {
+      crumbs.push({ name: 'Settings', href: location.pathname });
+    }
+
     return crumbs;
   }
   const crumbs = getBreadcrumbs();

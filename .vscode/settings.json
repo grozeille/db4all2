@@ -8,5 +8,9 @@
         "**/node_modules/**": true,
         "**/target/**": true,
         "**/bin/**": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        "npm run build": true,
+        "mvn -f api/pom.xml": true
     }
 }

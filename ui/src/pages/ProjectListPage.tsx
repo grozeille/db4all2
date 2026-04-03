@@ -27,6 +27,9 @@ export default function ProjectListPage() {
   const paged = projectsPage ? projectsPage.content : [];
   const totalPages = projectsPage ? projectsPage.totalPages : 0;
 
+  const getProjectName = (project: Project) => project.name || 'Untitled project';
+  const getProjectDescription = (project: Project) => project.description || 'No description';
+
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -45,8 +48,8 @@ export default function ProjectListPage() {
           <div className="col-md-4" key={p.id}>
             <div className="card h-100" style={{ cursor: 'pointer' }} onClick={() => navigate(`/projects/${p.id}/tables`, { state: { projectName: p.name } })}>
               <div className="card-body">
-                <h5 className="card-title">{p.name.length > 10 ? p.name.slice(0, 10) + '...' : p.name}</h5>
-                <p className="card-text text-muted">{p.description.length > 120 ? p.description.slice(0, 120) + '...' : p.description}</p>
+                <h5 className="card-title">{getProjectName(p).length > 10 ? getProjectName(p).slice(0, 10) + '...' : getProjectName(p)}</h5>
+                <p className="card-text text-muted">{getProjectDescription(p).length > 120 ? getProjectDescription(p).slice(0, 120) + '...' : getProjectDescription(p)}</p>
               </div>
             </div>
           </div>

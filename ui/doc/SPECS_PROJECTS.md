@@ -3,11 +3,10 @@
 ### Create a project
 
 As a user, in the "project list" view in /projects url, I can click on the "Create" button.
-It will open a popup asking me for the project name.
+It opens a form asking me for the project name.
 If the name is already used, or empty, an error message will be displayed in red under the name field.
-The popup has a Save/Cancel buton.
-Cancel to close the popup and Save to create the project with this name.
-Once the project created, the UI will redirect to the project's detail view /projects/{project_id} (the ID is returned by the API when the project is created).
+When the project is created, the current user is automatically added as project administrator.
+Once the project is created, the UI redirects to the project settings view /projects/{project_id}/settings.
 
 ### List and search projects
 
@@ -24,7 +23,7 @@ As a user, in the "project list" view, I can click on a project to open its deta
 If I enter a bad project_id (API result 404), I'll have a page with the message "Invalid project id".
 If I enter a project_id on which I don't have permission (403), I'll have a page with the message "You don't have permission to access this project".
 If I have the permission, it will display the name of the project as a header on the top left of the page with 2 tabs: Tables (/projects/{project_id}/tables) and Settings (/projects/{project_id}/settings).
-Settings tab is displayed only if I'm aministrator of the project (API return "administrator: true" in the response).
+Settings tab is displayed only if I'm administrator of the project (API returns "administrator: true" in the response DTO).
 
 For the "Tables" tab, specifications are explained in SPECS_TABLES.md.
 
@@ -46,19 +45,15 @@ Once deleted, it redirects to the /projects page.
 ### Grant permission to a project
 
 Under the description, there's a section with a header "Permissions".
-It lists all members of the project in table, with the name, a select box with the current role, and a "remove" button.
+It lists all project administrators in a table with the user login and a "remove" button.
 
-On the top of the list, there's an "Add user" button. When we click on it, there's a popupwith a label "Name:" and a textbox for the name, with select box for the role and a "Add" and "Cancel" button.
-Under the textbox, we'll display a red message if the user is already in the list, or the textbox is empty.
+On the top of the list, there's an "Add administrator" button. When we click on it, there's a popup with a select box listing users who are not already administrators, with an "Add" and "Cancel" button.
+Under the select box, we'll display a red message if no user is selected or if the selected user is already administrator.
 
-Using the select box in the list of users, we can change the permissions:
-- Reader
-- Writer
-- Administrator
-The current user can't change his role or remove him from the project.
-That means, we always have at least one administrator: the user who created the project, or he has to grant administrator access to another user which can remove him from the project.
+The current user can't remove himself from the project.
+That means we always have at least one administrator: the user who created the project, unless another administrator later removes him.
 
-Add or Remove or change the role will call the API POST/DELETE /projects/{project_id}/members/{user_id} so the effect is imediate. When the popup is closed, we call the API GET to /projects/{project_id}/members to refresh the list of members.
+Add or remove administrator calls the API POST/DELETE /projects/{project_id}/administrators/{user_id} so the effect is immediate. When the popup is closed, we call the API GET /projects/{project_id} to refresh the administrator list from the DTO.
 
 ### Add a data-source to a project
 

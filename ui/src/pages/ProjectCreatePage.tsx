@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createProject } from '../services/projectApi';
 
 export default function ProjectCreatePage() {
   const [name, setName] = useState('');
@@ -10,11 +11,10 @@ export default function ProjectCreatePage() {
     e.preventDefault();
     setError('');
     try {
-      // TODO: Appeler le vrai service d'API
-      // await createProject({ name });
-      navigate('/projects');
-    } catch (err: any) {
-      setError(err.message || 'Unknown error');
+      const createdProject = await createProject({ name });
+      navigate(`/projects/${createdProject.id}/settings`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     }
   };
 
