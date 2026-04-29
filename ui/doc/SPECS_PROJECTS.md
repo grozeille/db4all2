@@ -65,6 +65,7 @@ When we click on "Add data source" it displays a popup (with "Add" and "Cancel" 
 The popup let you choose first the type of data source with a select box: 
 - CIFS folder
 - S3 bucket
+- Azure Storage
 - PostgreSQL database
 
 For CIFS, it asks for a path, a login and a password.
@@ -74,4 +75,6 @@ For PostgreSQL database, it asks for a hostname, a port, a database name, a logi
 
 It also ask me for a name of the data source.
 When we click on "Add data source", it will call the API POST /project/{project_id}/datasources/{name} which will return 400 with an error message if we are not able to connect to the data source with these credentials.
+
+The detailed datasource, cache and view specifications are defined in SPECS_DATASOURCES.md.
 

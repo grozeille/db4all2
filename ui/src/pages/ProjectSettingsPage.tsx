@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Alert, Button, Form, Modal, Table } from 'react-bootstrap';
 import { addProjectAdministrator, deleteProject, getAvailableProjectAdministrators, getProject, removeProjectAdministrator, updateProject } from '../services/projectApi';
+import { createDatasource, deleteDatasource, getDatasources, testDatasourceConnection, updateDatasource } from '../services/datasourceApi';
+import type { Datasource, DatasourceUpsertRequest } from '../types/datasource';
 import type { Project } from '../types/project';
 
 export default function ProjectSettingsPage() {
@@ -17,6 +19,15 @@ export default function ProjectSettingsPage() {
   const [selectedUserToAdd, setSelectedUserToAdd] = useState('');
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [datasources, setDatasources] = useState<Datasource[]>([]);
+  const [datasourceError, setDatasourceError] = useState('');
+  const [datasourceSuccess, setDatasourceSuccess] = useState('');
+  const [showDatasourceModal, setShowDatasourceModal] = useState(false);
+  const [editingDatasourceId, setEditingDatasourceId] = useState<string | null>(null);
+  const [datasourceName, setDatasourceName] = useState('');
+  const [datasourceDescription, setDatasourceDescription] = useState('');
+  const [datasourceRootPath, setDatasourceRootPath] = useState('');
+  const [datasourceReadOnly, setDatasourceReadOnly] = useState(true);
 
   const loadProject = useCallback(async () => {
     if (!projectId) {
@@ -29,6 +40,14 @@ export default function ProjectSettingsPage() {
     setDescription(loadedProject.description);
   }, [projectId]);
 
+  const loadDatasources = useCallback(async () => {
+    if (!projectId) {
+      return;
+    }
+    const loadedDatasources = await getDatasources(projectId);
+    setDatasources(loadedDatasources);
+  }, [projectId]);
+
   useEffect(() => {
     if (!projectId) {
       return;
@@ -37,7 +56,10 @@ export default function ProjectSettingsPage() {
     loadProject().catch((err: Error) => {
       navigate(`/error/404`, { state: { message: err.message } });
     });
-  }, [loadProject, navigate, projectId]);
+    loadDatasources().catch((err: Error) => {
+      setDatasourceError(err.message);
+    });
+  }, [loadDatasources, loadProject, navigate, projectId]);
 
   const handleSave = async () => {
     if (!projectId) {
@@ -126,6 +148,103 @@ export default function ProjectSettingsPage() {
     }
   };
 
+  const resetDatasourceForm = () => {
+    setEditingDatasourceId(null);
+    setDatasourceName('');
+    setDatasourceDescription('');
+    setDatasourceRootPath('');
+    setDatasourceReadOnly(true);
+  };
+
+  const openCreateDatasourceModal = () => {
+    resetDatasourceForm();
+    setDatasourceError('');
+    setDatasourceSuccess('');
+    setShowDatasourceModal(true);
+  };
+
+  const openEditDatasourceModal = (datasource: Datasource) => {
+    setEditingDatasourceId(datasource.id);
+    setDatasourceName(datasource.name);
+    setDatasourceDescription(datasource.description);
+    setDatasourceRootPath(datasource.configuration.rootPath);
+    setDatasourceReadOnly(datasource.readOnly);
+    setDatasourceError('');
+    setDatasourceSuccess('');
+    setShowDatasourceModal(true);
+  };
+
+  const buildDatasourcePayload = (): DatasourceUpsertRequest => ({
+    name: datasourceName.trim(),
+    description: datasourceDescription,
+    type: 'LOCAL_FILESYSTEM',
+    readOnly: datasourceReadOnly,
+    configuration: {
+      rootPath: datasourceRootPath.trim(),
+    },
+  });
+
+  const handleSaveDatasource = async () => {
+    if (!projectId) {
+      return;
+    }
+    if (!datasourceName.trim()) {
+      setDatasourceError('Datasource name is required.');
+      return;
+    }
+    if (!datasourceRootPath.trim()) {
+      setDatasourceError('Datasource root path is required.');
+      return;
+    }
+
+    try {
+      const payload = buildDatasourcePayload();
+      if (editingDatasourceId) {
+        await updateDatasource(projectId, editingDatasourceId, payload);
+        setDatasourceSuccess('Datasource updated.');
+      } else {
+        await createDatasource(projectId, payload);
+        setDatasourceSuccess('Datasource created.');
+      }
+      setShowDatasourceModal(false);
+      resetDatasourceForm();
+      await loadDatasources();
+    } catch (err) {
+      setDatasourceError(err instanceof Error ? err.message : 'Unexpected error');
+    }
+  };
+
+  const handleDeleteDatasource = async (datasourceId: string) => {
+    if (!projectId) {
+      return;
+    }
+
+    setDatasourceError('');
+    setDatasourceSuccess('');
+    try {
+      await deleteDatasource(projectId, datasourceId);
+      setDatasourceSuccess('Datasource deleted.');
+      await loadDatasources();
+    } catch (err) {
+      setDatasourceError(err instanceof Error ? err.message : 'Unexpected error');
+    }
+  };
+
+  const handleTestDatasource = async (datasourceId: string) => {
+    if (!projectId) {
+      return;
+    }
+
+    setDatasourceError('');
+    setDatasourceSuccess('');
+    try {
+      const message = await testDatasourceConnection(projectId, datasourceId);
+      setDatasourceSuccess(message);
+    } catch (err) {
+      setDatasourceError(err instanceof Error ? err.message : 'Unexpected error');
+    }
+  };
+
   if (!project) {
     return <div>Loading project settings...</div>;
   }
@@ -190,7 +309,49 @@ export default function ProjectSettingsPage() {
 
         <div className="mb-4 text-start">
           <h4 className="mb-3">Data sources</h4>
-          <Alert variant="secondary">Data source management is not implemented yet.</Alert>
+          {datasourceError && <Alert variant="danger">{datasourceError}</Alert>}
+          {datasourceSuccess && <Alert variant="success">{datasourceSuccess}</Alert>}
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="text-muted">Only local filesystem datasources are available in the current MVP.</div>
+            <Button variant="primary" onClick={openCreateDatasourceModal}>Add datasource</Button>
+          </div>
+          <Table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Root path</th>
+                <th>Read-only</th>
+                <th className="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {datasources.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center text-muted">No datasource configured yet.</td>
+                </tr>
+              )}
+              {datasources.map((datasource) => (
+                <tr key={datasource.id}>
+                  <td>{datasource.name}</td>
+                  <td>{datasource.type}</td>
+                  <td>{datasource.configuration.rootPath}</td>
+                  <td>{datasource.readOnly ? 'Yes' : 'No'}</td>
+                  <td className="text-end d-flex justify-content-end gap-2">
+                    <Button variant="outline-secondary" size="sm" onClick={() => handleTestDatasource(datasource.id)}>
+                      Test
+                    </Button>
+                    <Button variant="outline-primary" size="sm" onClick={() => openEditDatasourceModal(datasource)}>
+                      Edit
+                    </Button>
+                    <Button variant="outline-danger" size="sm" onClick={() => handleDeleteDatasource(datasource.id)}>
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </div>
 
         <div className="border rounded p-3 text-start" style={{ borderColor: 'red' }}>
@@ -222,6 +383,38 @@ export default function ProjectSettingsPage() {
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowAddAdminModal(false)}>Cancel</Button>
           <Button variant="primary" onClick={handleAddAdministrator} disabled={availableUsers.length === 0}>Add</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showDatasourceModal} onHide={() => setShowDatasourceModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{editingDatasourceId ? 'Edit datasource' : 'Add datasource'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {datasourceError && <Alert variant="danger">{datasourceError}</Alert>}
+          <Form.Group className="mb-3">
+            <Form.Label>Name</Form.Label>
+            <Form.Control value={datasourceName} onChange={(event) => setDatasourceName(event.target.value)} />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Description</Form.Label>
+            <Form.Control as="textarea" rows={3} value={datasourceDescription} onChange={(event) => setDatasourceDescription(event.target.value)} />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Root path</Form.Label>
+            <Form.Control value={datasourceRootPath} onChange={(event) => setDatasourceRootPath(event.target.value)} placeholder="/workspaces/db4all2/data" />
+          </Form.Group>
+          <Form.Check
+            type="switch"
+            id="datasource-readonly"
+            label="Read-only"
+            checked={datasourceReadOnly}
+            onChange={(event) => setDatasourceReadOnly(event.target.checked)}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDatasourceModal(false)}>Cancel</Button>
+          <Button variant="primary" onClick={handleSaveDatasource}>Save</Button>
         </Modal.Footer>
       </Modal>
     </>

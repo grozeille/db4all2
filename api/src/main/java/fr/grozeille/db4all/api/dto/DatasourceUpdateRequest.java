@@ -1,7 +1,7 @@
 package fr.grozeille.db4all.api.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import fr.grozeille.db4all.api.model.TableSourceKind;
+import fr.grozeille.db4all.api.model.DatasourceType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -13,18 +13,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TableUpdateRequest {
+public class DatasourceUpdateRequest {
     @NotBlank
     private String name;
 
     private String description;
 
-    @NotBlank
-    private String datasourceId;
+    @Builder.Default
+    private boolean readOnly = true;
 
     @NotNull
-    private TableSourceKind sourceKind;
+    private DatasourceType type;
 
+    @Valid
     @NotNull
-    private JsonNode configuration;
+    private LocalFilesystemDatasourceConfigurationDto configuration;
 }

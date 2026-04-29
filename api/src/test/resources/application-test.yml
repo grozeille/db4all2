@@ -3,7 +3,8 @@ spring:
   main:
     register-shutdown-hook: false
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    generate-unique-name: true
+    name: db4all-test
     driverClassName: org.h2.Driver
     username: sa
     password:
@@ -13,3 +14,5 @@ spring:
       ddl-auto: create-drop
     # Use the H2 dialect for JPA
     database-platform: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false

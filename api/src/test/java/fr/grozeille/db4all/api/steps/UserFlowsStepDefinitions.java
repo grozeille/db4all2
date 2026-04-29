@@ -1,11 +1,16 @@
 package fr.grozeille.db4all.api.steps;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.grozeille.db4all.api.dto.AdminUpdatePasswordRequest;
 import fr.grozeille.db4all.api.dto.CreateUserRequest;
+import fr.grozeille.db4all.api.dto.DatasourceCreationRequest;
+import fr.grozeille.db4all.api.dto.LocalFilesystemDatasourceConfigurationDto;
 import fr.grozeille.db4all.api.dto.ProjectCreationRequest;
 import fr.grozeille.db4all.api.dto.TableCreationRequest;
+import fr.grozeille.db4all.api.model.DatasourceType;
 import fr.grozeille.db4all.api.model.Project;
+import fr.grozeille.db4all.api.model.TableSourceKind;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.repository.UserRepository;
 import io.cucumber.java.en.Given;
@@ -21,6 +26,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -50,6 +58,7 @@ public class UserFlowsStepDefinitions {
     private String currentUser;
     private String currentUserRoles;
     private String createdProjectId;
+    private String createdDatasourceId;
     private ResultActions lastResult;
 
     @Given("the system is set up with an initial super admin {string}")
@@ -134,6 +143,35 @@ public class UserFlowsStepDefinitions {
                 .andExpect(jsonPath("$.name").value(projectName));
     }
 
+        @When("I create a local datasource named {string} for this project")
+        public void iCreateALocalDatasourceForThisProject(String datasourceName) throws Exception {
+        Path rootPath = Files.createTempDirectory("db4all-datasource-");
+
+        DatasourceCreationRequest request = DatasourceCreationRequest.builder()
+            .name(datasourceName)
+            .description("A local datasource for tests")
+            .type(DatasourceType.LOCAL_FILESYSTEM)
+            .readOnly(true)
+            .configuration(LocalFilesystemDatasourceConfigurationDto.builder()
+                .rootPath(rootPath.toString())
+                .build())
+            .build();
+
+        lastResult = mockMvc.perform(post("/api/v2/projects/" + createdProjectId + "/datasources")
+            .with(user(currentUser).roles(currentUserRoles))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)));
+
+        String response = lastResult.andReturn().getResponse().getContentAsString();
+        this.createdDatasourceId = objectMapper.readTree(response).path("id").asText();
+        }
+
+        @Then("the datasource {string} is created successfully")
+        public void theDatasourceIsCreatedSuccessfully(String datasourceName) throws Exception {
+        lastResult.andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name").value(datasourceName));
+        }
+
     @Then("I see {int} project when I list all projects")
     public void iSeeProjectsWhenIListAllProjects(int count) throws Exception {
         mockMvc.perform(get("/api/v2/projects?page=0&size=10")
@@ -144,9 +182,17 @@ public class UserFlowsStepDefinitions {
 
     @When("I create a new table named {string} for this project")
     public void iCreateANewTable(String tableName) throws Exception {
+        ObjectNode configuration = objectMapper.createObjectNode();
+        configuration.put("path", "test.csv");
+        configuration.put("separator", ",");
+        configuration.put("firstRowAsHeader", true);
+
         TableCreationRequest request = TableCreationRequest.builder()
                 .name(tableName)
                 .description("A test table")
+            .datasourceId(createdDatasourceId)
+            .sourceKind(TableSourceKind.CSV)
+            .configuration(configuration)
                 .build();
 
         lastResult = mockMvc.perform(post("/api/v2/projects/" + createdProjectId + "/tables")
@@ -157,7 +203,7 @@ public class UserFlowsStepDefinitions {
 
     @Then("the table {string} is created successfully")
     public void theTableIsCreatedSuccessfully(String tableName) throws Exception {
-        lastResult.andExpect(status().isOk())
+        lastResult.andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value(tableName));
     }
 

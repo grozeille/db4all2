@@ -1,0 +1,1953 @@
+openapi: 3.1.0
+info:
+  title: DB4ALL Datasources Draft API
+  version: v0-draft
+  description: |
+    Draft OpenAPI specification generated from the functional specifications.
+    It documents the intended datasource, table mapping, cache and query endpoints,
+    even when the corresponding backend endpoints are not implemented yet.
+    Current MVP target is a standalone deployment with H2 as the internal application database,
+    and LOCAL_FILESYSTEM as the only user-facing datasource type.
+    Current MVP authorization is simplified: project administrators can perform all project operations.
+servers:
+  - url: /
+security:
+  - bearerAuth: []
+  - passwordFlow: []
+tags:
+  - name: Data Sources
+    description: Datasource management inside a project.
+  - name: Table Mapping
+    description: Mapping physical sources to project tables.
+  - name: Table Query
+    description: Querying, previewing and saving table transformations.
+  - name: Views
+    description: Saving and querying logical views derived from tables.
+  - name: Table Cache
+    description: Cache and source copy management.
+  - name: Uploads
+    description: File uploads into managed project storage.
+paths:
+  /api/v2/projects/{projectId}/datasources:
+    get:
+      tags:
+        - Data Sources
+      summary: List project datasources
+      description: Returns all datasources configured for a project.
+      operationId: listProjectDatasources
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Datasources retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DatasourceSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ProjectNotFound'
+    post:
+      tags:
+        - Data Sources
+      summary: Create project datasource
+      description: |
+        Creates a datasource for a project and optionally validates connectivity before saving.
+        In the current MVP target, only LOCAL_FILESYSTEM is implemented.
+      operationId: createProjectDatasource
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasourceCreateRequest'
+      responses:
+        '201':
+          description: Datasource created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasourceDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ProjectNotFound'
+
+  /api/v2/projects/{projectId}/datasources/{datasourceId}:
+    get:
+      tags:
+        - Data Sources
+      summary: Get datasource details
+      operationId: getProjectDatasource
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/DatasourceId'
+      responses:
+        '200':
+          description: Datasource retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasourceDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DatasourceNotFound'
+    put:
+      tags:
+        - Data Sources
+      summary: Update datasource
+      operationId: updateProjectDatasource
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/DatasourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasourceUpdateRequest'
+      responses:
+        '200':
+          description: Datasource updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasourceDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DatasourceNotFound'
+    delete:
+      tags:
+        - Data Sources
+      summary: Delete datasource
+      operationId: deleteProjectDatasource
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/DatasourceId'
+      responses:
+        '204':
+          description: Datasource deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DatasourceNotFound'
+
+  /api/v2/projects/{projectId}/datasources/{datasourceId}/test-connection:
+    post:
+      tags:
+        - Data Sources
+      summary: Test datasource connection
+      description: Verifies that the datasource configuration can be used successfully.
+      operationId: testDatasourceConnection
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/DatasourceId'
+      responses:
+        '200':
+          description: Connection successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionTestResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DatasourceNotFound'
+
+  /api/v2/projects/{projectId}/datasources/{datasourceId}/scan:
+    post:
+      tags:
+        - Data Sources
+      summary: Scan datasource content
+      description: |
+        Scans a datasource for selectable content. Typical use cases are:
+        listing sheets in an Excel file, listing named ranges, or listing database tables.
+      operationId: scanDatasourceContent
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/DatasourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasourceScanRequest'
+      responses:
+        '200':
+          description: Scan completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasourceScanResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DatasourceNotFound'
+
+  /api/v2/projects/{projectId}/datasources/{datasourceId}/uploads:
+    post:
+      tags:
+        - Uploads
+      summary: Upload file to managed storage
+      description: Uploads a file to a managed project folder when the datasource allows writing.
+      operationId: uploadDatasourceFile
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/DatasourceId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - targetPath
+              properties:
+                file:
+                  type: string
+                  format: binary
+                targetPath:
+                  type: string
+                  description: Destination path relative to the datasource root.
+      responses:
+        '201':
+          description: File uploaded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DatasourceNotFound'
+
+  /api/v2/projects/{projectId}/tables:
+    get:
+      tags:
+        - Table Mapping
+      summary: List project tables
+      operationId: listProjectTables
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Paged list of tables.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTableSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ProjectNotFound'
+    post:
+      tags:
+        - Table Mapping
+      summary: Create physical table mapping
+      description: Creates a project table mapped to a datasource file, relation or file pattern.
+      operationId: createProjectTable
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableCreateRequest'
+      responses:
+        '201':
+          description: Table created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ProjectNotFound'
+
+  /api/v2/projects/{projectId}/tables/{tableId}:
+    get:
+      tags:
+        - Table Mapping
+      summary: Get table definition
+      operationId: getProjectTable
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      responses:
+        '200':
+          description: Table retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+    put:
+      tags:
+        - Table Mapping
+      summary: Update table definition
+      operationId: updateProjectTable
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableUpdateRequest'
+      responses:
+        '200':
+          description: Table updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+    delete:
+      tags:
+        - Table Mapping
+      summary: Delete table
+      operationId: deleteProjectTable
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      responses:
+        '204':
+          description: Table deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+
+  /api/v2/projects/{projectId}/tables/{tableId}/query:
+    post:
+      tags:
+        - Table Query
+      summary: Query table content
+      description: Applies filters, aggregations, column visibility and custom columns to preview data.
+      operationId: queryTableContent
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableQueryRequest'
+            examples:
+              selectTop10:
+                $ref: '#/components/examples/TableQuerySelectTop10'
+              distinctProjection:
+                $ref: '#/components/examples/TableQueryDistinctProjection'
+              filteredColumns:
+                $ref: '#/components/examples/TableQueryFilteredColumns'
+              stringComparisons:
+                $ref: '#/components/examples/TableQueryStringComparisons'
+              aggregation:
+                $ref: '#/components/examples/TableQueryAggregation'
+      responses:
+        '200':
+          description: Query executed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableQueryResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/InvalidQuery'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+
+  /api/v2/projects/{projectId}/tables/{tableId}/query/export-csv:
+    post:
+      tags:
+        - Table Query
+      summary: Export query result as CSV
+      description: |
+        Executes the query and streams the matching result as a CSV file.
+        This endpoint is intended for full-result export, unlike the preview query endpoint used by the UI grid.
+      operationId: exportTableQueryAsCsv
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableQueryRequest'
+            examples:
+              filteredColumns:
+                $ref: '#/components/examples/TableQueryFilteredColumns'
+              stringComparisons:
+                $ref: '#/components/examples/TableQueryStringComparisons'
+              aggregation:
+                $ref: '#/components/examples/TableQueryAggregation'
+      responses:
+        '200':
+          description: CSV export generated.
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/InvalidQuery'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+
+  /api/v2/projects/{projectId}/views:
+    get:
+      tags:
+        - Views
+      summary: List project views
+      description: Returns logical views saved in a project.
+      operationId: listProjectViews
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Paged list of views.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedViewSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ProjectNotFound'
+    post:
+      tags:
+        - Views
+      summary: Save a query as a logical view
+      description: |
+        Persists a logical view definition derived from a source table or another view.
+        Views do not have their own cache in the current functional specification.
+        If persistent acceleration is needed, materialize the result as a physical table instead.
+      operationId: createProjectView
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewCreateRequest'
+            examples:
+              filteredView:
+                $ref: '#/components/examples/ViewCreateFiltered'
+              joinView:
+                $ref: '#/components/examples/ViewCreateJoin'
+      responses:
+        '201':
+          description: View created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/InvalidQuery'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ProjectNotFound'
+
+  /api/v2/projects/{projectId}/views/{viewId}:
+    get:
+      tags:
+        - Views
+      summary: Get view definition
+      operationId: getProjectView
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/ViewId'
+      responses:
+        '200':
+          description: View retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ViewNotFound'
+    put:
+      tags:
+        - Views
+      summary: Update logical view
+      operationId: updateProjectView
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/ViewId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewUpdateRequest'
+      responses:
+        '200':
+          description: View updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/InvalidQuery'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ViewNotFound'
+    delete:
+      tags:
+        - Views
+      summary: Delete logical view
+      operationId: deleteProjectView
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/ViewId'
+      responses:
+        '204':
+          description: View deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ViewNotFound'
+
+  /api/v2/projects/{projectId}/views/{viewId}/query:
+    post:
+      tags:
+        - Views
+      summary: Query logical view content
+      description: |
+        Executes a saved logical view. Views do not have a dedicated cache of their own.
+        The same query DSL as table queries is used.
+      operationId: queryViewContent
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/ViewId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableQueryRequest'
+            examples:
+              selectTop10:
+                $ref: '#/components/examples/TableQuerySelectTop10'
+              distinctProjection:
+                $ref: '#/components/examples/TableQueryDistinctProjection'
+              filteredColumns:
+                $ref: '#/components/examples/TableQueryFilteredColumns'
+              stringComparisons:
+                $ref: '#/components/examples/TableQueryStringComparisons'
+              aggregation:
+                $ref: '#/components/examples/TableQueryAggregation'
+      responses:
+        '200':
+          description: View query executed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableQueryResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/InvalidQuery'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ViewNotFound'
+
+  /api/v2/projects/{projectId}/views/{viewId}/query/export-csv:
+    post:
+      tags:
+        - Views
+      summary: Export view query result as CSV
+      description: |
+        Executes the view query and streams the matching result as a CSV file.
+        Views do not have their own cache in the current specification.
+      operationId: exportViewQueryAsCsv
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/ViewId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableQueryRequest'
+            examples:
+              filteredColumns:
+                $ref: '#/components/examples/TableQueryFilteredColumns'
+              stringComparisons:
+                $ref: '#/components/examples/TableQueryStringComparisons'
+              aggregation:
+                $ref: '#/components/examples/TableQueryAggregation'
+      responses:
+        '200':
+          description: CSV export generated.
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/InvalidQuery'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ViewNotFound'
+
+  /api/v2/projects/{projectId}/tables/{tableId}/cache:
+    get:
+      tags:
+        - Table Cache
+      summary: Get cache policy
+      operationId: getTableCachePolicy
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      responses:
+        '200':
+          description: Cache policy retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableCacheConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+    put:
+      tags:
+        - Table Cache
+      summary: Update cache policy
+      operationId: updateTableCachePolicy
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableCacheConfiguration'
+      responses:
+        '200':
+          description: Cache policy updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableCacheConfiguration'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+    delete:
+      tags:
+        - Table Cache
+      summary: Delete analytical cache
+      operationId: deleteTableCache
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      responses:
+        '204':
+          description: Cache deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+
+  /api/v2/projects/{projectId}/tables/{tableId}/cache/refresh:
+    post:
+      tags:
+        - Table Cache
+      summary: Trigger cache refresh
+      operationId: refreshTableCache
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      responses:
+        '202':
+          description: Refresh job accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobAcceptedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+
+  /api/v2/projects/{projectId}/tables/{tableId}/cache/invalidate:
+    post:
+      tags:
+        - Table Cache
+      summary: Invalidate analytical cache
+      operationId: invalidateTableCache
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/TableId'
+      responses:
+        '202':
+          description: Cache invalidation accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobAcceptedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TableNotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    passwordFlow:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: /api/v2/auth/login
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+    DatasourceId:
+      name: datasourceId
+      in: path
+      required: true
+      schema:
+        type: string
+    TableId:
+      name: tableId
+      in: path
+      required: true
+      schema:
+        type: string
+    ViewId:
+      name: viewId
+      in: path
+      required: true
+      schema:
+        type: string
+    Search:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+  responses:
+    Unauthorized:
+      description: Authentication required.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Access denied.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: Invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InvalidQuery:
+      description: |
+        Query payload is syntactically valid JSON but semantically invalid for the target schema.
+        Examples: using STARTS_WITH on a boolean column, applying SUM on a string column,
+        or referencing an unknown column in filters, projection or aggregation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ProjectNotFound:
+      description: Project not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    DatasourceNotFound:
+      description: Datasource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TableNotFound:
+      description: Table not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ViewNotFound:
+      description: View not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  examples:
+    TableQuerySelectTop10:
+      summary: Equivalent to select star top 10
+      value:
+        size: 10
+        page: 0
+    TableQueryDistinctProjection:
+      summary: Select distinct projected columns
+      value:
+        distinct: true
+        selectedColumns:
+          - column: country
+          - column: category
+        size: 10
+        page: 0
+    TableQueryFilteredColumns:
+      summary: Select col1 col2 with equality inequality and in filters
+      value:
+        selectedColumns:
+          - column: col1
+          - column: col2
+        filters:
+          - operator: OR
+            groups:
+              - operator: AND
+                conditions:
+                  - column: col3
+                    operator: EQ
+                    value: value
+                  - column: col4
+                    operator: NEQ
+                    value: value
+              - operator: AND
+                conditions:
+                  - column: col5
+                    operator: IN
+                    values:
+                      - value1
+                      - value2
+        size: 100
+        page: 0
+    TableQueryStringComparisons:
+      summary: String operators contains startsWith endsWith
+      value:
+        selectedColumns:
+          - column: customerName
+            alias: customer_name
+          - column: customerCode
+          - column: email
+          - column: city
+        filters:
+          - operator: AND
+            conditions:
+              - column: customerName
+                operator: CONTAINS
+                value: smith
+                ignoreCase: true
+              - column: customerCode
+                operator: STARTS_WITH
+                value: CLI-
+                ignoreCase: true
+              - column: email
+                operator: ENDS_WITH
+                value: '@example.com'
+                ignoreCase: true
+              - column: city
+                operator: NOT_CONTAINS
+                value: test
+                ignoreCase: true
+        size: 50
+        page: 0
+    TableQueryAggregation:
+      summary: Group by with count and sum
+      value:
+        filters:
+          - operator: AND
+            conditions:
+              - column: status
+                operator: EQ
+                value: ACTIVE
+        aggregations:
+          groupedBy:
+            - country
+            - category
+          functions:
+            - column: id
+              function: COUNT
+              alias: row_count
+            - column: amount
+              function: SUM
+              alias: total_amount
+        size: 100
+        page: 0
+    ViewCreateFiltered:
+      summary: Save a filtered query as a view
+      value:
+        name: active_customers_view
+        description: Customers filtered for active business records
+        type: FILTER
+        sourceTableId: table-customers
+        query:
+          selectedColumns:
+            - column: customer_id
+            - column: customer_name
+            - column: country
+          filters:
+            - operator: AND
+              conditions:
+                - column: status
+                  operator: EQ
+                  value: ACTIVE
+                - column: customer_name
+                  operator: CONTAINS
+                  value: Corp
+                  ignoreCase: true
+    ViewCreateJoin:
+      summary: Save a join view
+      value:
+        name: orders_with_customers
+        description: Orders enriched with customer information
+        type: JOIN
+        join:
+          leftSourceId: table-orders
+          rightSourceId: view-active-customers
+          joinType: INNER
+          conditions:
+            - leftColumn: customer_id
+              operator: EQ
+              rightColumn: customer_id
+        query:
+          selectedColumns:
+            - column: order_id
+            - column: order_date
+            - column: amount
+            - column: customer_name
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+
+    DatasourceType:
+      type: string
+      description: In the current MVP target, only LOCAL_FILESYSTEM is implemented.
+      enum:
+        - LOCAL_FILESYSTEM
+        - S3
+        - AZURE_STORAGE
+        - POSTGRESQL
+        - CIFS
+
+    DatasourceSummary:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - readOnly
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/DatasourceType'
+        readOnly:
+          type: boolean
+        cacheDefaultPolicySummary:
+          type: string
+
+    DatasourceDetail:
+      allOf:
+        - $ref: '#/components/schemas/DatasourceSummary'
+        - type: object
+          required:
+            - configuration
+          properties:
+            configuration:
+              $ref: '#/components/schemas/DatasourceConfiguration'
+
+    DatasourceCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/DatasourceUpsertBase'
+        - type: object
+          required:
+            - name
+
+    DatasourceUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/DatasourceUpsertBase'
+
+    DatasourceUpsertBase:
+      type: object
+      required:
+        - type
+        - configuration
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        readOnly:
+          type: boolean
+          default: true
+        type:
+          $ref: '#/components/schemas/DatasourceType'
+        configuration:
+          $ref: '#/components/schemas/DatasourceConfiguration'
+
+    DatasourceConfiguration:
+      oneOf:
+        - $ref: '#/components/schemas/LocalFilesystemDatasourceConfiguration'
+        - $ref: '#/components/schemas/S3DatasourceConfiguration'
+        - $ref: '#/components/schemas/AzureStorageDatasourceConfiguration'
+        - $ref: '#/components/schemas/PostgreSqlDatasourceConfiguration'
+        - $ref: '#/components/schemas/CifsDatasourceConfiguration'
+      discriminator:
+        propertyName: type
+        mapping:
+          LOCAL_FILESYSTEM: '#/components/schemas/LocalFilesystemDatasourceConfiguration'
+          S3: '#/components/schemas/S3DatasourceConfiguration'
+          AZURE_STORAGE: '#/components/schemas/AzureStorageDatasourceConfiguration'
+          POSTGRESQL: '#/components/schemas/PostgreSqlDatasourceConfiguration'
+          CIFS: '#/components/schemas/CifsDatasourceConfiguration'
+
+    LocalFilesystemDatasourceConfiguration:
+      type: object
+      description: Current MVP datasource type for standalone demos and local usage.
+      required:
+        - type
+        - rootPath
+      properties:
+        type:
+          type: string
+          const: LOCAL_FILESYSTEM
+        rootPath:
+          type: string
+
+    S3DatasourceConfiguration:
+      type: object
+      required:
+        - type
+        - host
+        - bucket
+        - accessKey
+        - secretKey
+      properties:
+        type:
+          type: string
+          const: S3
+        host:
+          type: string
+        port:
+          type: integer
+        bucket:
+          type: string
+        basePathPrefix:
+          type: string
+        accessKey:
+          type: string
+        secretKey:
+          type: string
+          format: password
+        region:
+          type: string
+        advancedOptions:
+          type: object
+          additionalProperties:
+            type: string
+
+    AzureStorageDatasourceConfiguration:
+      type: object
+      required:
+        - type
+        - accountName
+        - container
+        - credentialType
+      properties:
+        type:
+          type: string
+          const: AZURE_STORAGE
+        accountName:
+          type: string
+        container:
+          type: string
+        basePathPrefix:
+          type: string
+        credentialType:
+          type: string
+          enum:
+            - SHARED_KEY
+            - SAS_TOKEN
+        sharedKey:
+          type: string
+          format: password
+        sasToken:
+          type: string
+          format: password
+
+    PostgreSqlDatasourceConfiguration:
+      type: object
+      required:
+        - type
+        - hostname
+        - port
+        - databaseName
+        - login
+        - password
+      properties:
+        type:
+          type: string
+          const: POSTGRESQL
+        hostname:
+          type: string
+        port:
+          type: integer
+        databaseName:
+          type: string
+        schemaFilter:
+          type: string
+        login:
+          type: string
+        password:
+          type: string
+          format: password
+        connectionProperties:
+          type: object
+          additionalProperties:
+            type: string
+
+    CifsDatasourceConfiguration:
+      type: object
+      required:
+        - type
+        - path
+        - login
+        - password
+      properties:
+        type:
+          type: string
+          const: CIFS
+        path:
+          type: string
+          description: UNC path or server/share path.
+        login:
+          type: string
+        password:
+          type: string
+          format: password
+        syncFrequency:
+          $ref: '#/components/schemas/SyncFrequency'
+        usageNotes:
+          type: string
+          example: Use only for small files. Prefer S3 or Azure Storage for large CSV or Parquet datasets.
+
+    SyncFrequency:
+      type: object
+      required:
+        - value
+        - unit
+      properties:
+        value:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+          enum:
+            - HOURS
+            - DAYS
+        cron:
+          type: string
+          description: Optional advanced scheduling expression.
+
+    ConnectionTestResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    DatasourceScanRequest:
+      type: object
+      properties:
+        filePath:
+          type: string
+          description: File path relative to the datasource root.
+        filePattern:
+          type: string
+        scanType:
+          type: string
+          enum:
+            - EXCEL_SHEETS
+            - EXCEL_NAMED_RANGES
+            - POSTGRES_TABLES
+            - FILES
+
+    DatasourceScanResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScanItem'
+
+    ScanItem:
+      type: object
+      required:
+        - id
+        - label
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        itemType:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UploadResponse:
+      type: object
+      required:
+        - storedPath
+      properties:
+        storedPath:
+          type: string
+        originalFilename:
+          type: string
+        size:
+          type: integer
+          format: int64
+
+    TableType:
+      type: string
+      enum:
+        - CSV
+        - EXCEL
+        - PARQUET
+        - POSTGRESQL
+        - VIEW
+
+    TableSummary:
+      type: object
+      required:
+        - id
+        - name
+        - sourceKind
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        sourceKind:
+          $ref: '#/components/schemas/TableType'
+        datasourceId:
+          type: string
+        cacheEnabled:
+          type: boolean
+
+    TableDetail:
+      allOf:
+        - $ref: '#/components/schemas/TableSummary'
+        - type: object
+          properties:
+            configuration:
+              $ref: '#/components/schemas/TableSourceConfiguration'
+            cache:
+              $ref: '#/components/schemas/TableCacheConfiguration'
+
+    PagedTableSummary:
+      type: object
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+
+    TableCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/TableUpsertBase'
+        - type: object
+          required:
+            - name
+            - datasourceId
+            - sourceKind
+            - configuration
+
+    TableUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/TableUpsertBase'
+
+    TableUpsertBase:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        datasourceId:
+          type: string
+        sourceKind:
+          $ref: '#/components/schemas/TableType'
+        configuration:
+          $ref: '#/components/schemas/TableSourceConfiguration'
+
+    TableSourceConfiguration:
+      description: Current MVP implementation target is CSV and PARQUET on top of LOCAL_FILESYSTEM.
+      oneOf:
+        - $ref: '#/components/schemas/CsvTableConfiguration'
+        - $ref: '#/components/schemas/ExcelTableConfiguration'
+        - $ref: '#/components/schemas/ParquetTableConfiguration'
+        - $ref: '#/components/schemas/PostgreSqlTableConfiguration'
+      discriminator:
+        propertyName: sourceKind
+        mapping:
+          CSV: '#/components/schemas/CsvTableConfiguration'
+          EXCEL: '#/components/schemas/ExcelTableConfiguration'
+          PARQUET: '#/components/schemas/ParquetTableConfiguration'
+          POSTGRESQL: '#/components/schemas/PostgreSqlTableConfiguration'
+
+    CsvTableConfiguration:
+      type: object
+      required:
+        - sourceKind
+        - path
+      properties:
+        sourceKind:
+          type: string
+          const: CSV
+        path:
+          type: string
+        separator:
+          type: string
+        quoteCharacter:
+          type: string
+        encoding:
+          type: string
+        firstRowAsHeader:
+          type: boolean
+        nullValue:
+          type: string
+
+    ExcelTableConfiguration:
+      type: object
+      required:
+        - sourceKind
+        - filePath
+      properties:
+        sourceKind:
+          type: string
+          const: EXCEL
+        filePath:
+          type: string
+        sheetName:
+          type: string
+        namedRange:
+          type: string
+        explicitRange:
+          type: string
+        firstRowAsHeader:
+          type: boolean
+
+    ParquetTableConfiguration:
+      type: object
+      required:
+        - sourceKind
+        - path
+      properties:
+        sourceKind:
+          type: string
+          const: PARQUET
+        path:
+          type: string
+
+    PostgreSqlTableConfiguration:
+      type: object
+      required:
+        - sourceKind
+      properties:
+        sourceKind:
+          type: string
+          const: POSTGRESQL
+        schemaName:
+          type: string
+        tableName:
+          type: string
+        relationName:
+          type: string
+
+    TableCacheConfiguration:
+      type: object
+      description: |
+        Cache policy for a physical table.
+        Refresh creates a new cache version, switches to it when complete, then deletes the old version.
+        Invalidation removes the active cache version so subsequent queries hit the real source.
+      properties:
+        enabled:
+          type: boolean
+        refreshSchedule:
+          $ref: '#/components/schemas/SyncFrequency'
+        preferCacheForReads:
+          type: boolean
+        sourceCopyPolicy:
+          $ref: '#/components/schemas/SourceCopyPolicy'
+        lastRefreshStatus:
+          type: string
+          enum:
+            - IDLE
+            - PENDING
+            - RUNNING
+            - SUCCEEDED
+            - FAILED
+
+    SourceCopyPolicy:
+      type: object
+      description: Required for CIFS-backed tables, optional for other datasource types.
+      properties:
+        enabled:
+          type: boolean
+        frequency:
+          $ref: '#/components/schemas/SyncFrequency'
+
+    TableQueryRequest:
+      type: object
+      description: |
+        JSON query DSL used by tables and views.
+        There is no single dominant standard for this kind of end-user analytical filtering JSON.
+        Common practice is to define an application-specific DSL, or to adopt a constrained subset inspired by products such as JSON Logic, OData or GraphQL filter conventions.
+        This specification uses a project-specific DSL optimized for low-code table exploration.
+        For UI preview, clients should request at most 1000 rows.
+      properties:
+        selectedColumns:
+          type: array
+          description: |
+            Explicit projection list.
+            When omitted, all source columns are returned.
+            Use the optional alias field to rename a selected column.
+          items:
+            $ref: '#/components/schemas/SelectedColumn'
+        distinct:
+          type: boolean
+          default: false
+          description: |
+            When true, duplicate rows are removed from the projected result.
+            This applies before pagination. It is primarily intended for non-aggregated queries.
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterGroup'
+        aggregations:
+          $ref: '#/components/schemas/AggregationRequest'
+        customColumns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomColumn'
+        page:
+          type: integer
+          minimum: 0
+          default: 0
+        size:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+          description: Maximum number of preview rows returned by the API. The UI should not request more than 1000 rows.
+
+    TableQueryResponse:
+      type: object
+      required:
+        - columns
+        - rows
+      description: |
+        Query result page.
+        The API intentionally does not return a total row count because computing a full COUNT can be too expensive
+        or too slow on some remote or file-based sources.
+        The UI grid is expected to show at most 1000 rows.
+      properties:
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ColumnDefinition'
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+    ColumnDefinition:
+      type: object
+      required:
+        - name
+        - dataType
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+
+    SelectedColumn:
+      type: object
+      required:
+        - column
+      properties:
+        column:
+          type: string
+        alias:
+          type: string
+          description: Optional output name for the selected column.
+
+    FilterGroup:
+      type: object
+      properties:
+        operator:
+          type: string
+          enum:
+            - AND
+            - OR
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterCondition'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterGroup'
+
+    FilterCondition:
+      type: object
+      required:
+        - column
+        - operator
+      properties:
+        column:
+          type: string
+        operator:
+          type: string
+          enum:
+            - EQ
+            - NEQ
+            - GT
+            - GTE
+            - LT
+            - LTE
+            - IN
+            - NOT_IN
+            - CONTAINS
+            - NOT_CONTAINS
+            - STARTS_WITH
+            - NOT_STARTS_WITH
+            - ENDS_WITH
+            - NOT_ENDS_WITH
+            - IS_TRUE
+            - IS_FALSE
+            - IS_NULL
+            - IS_NOT_NULL
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+        values:
+          type: array
+          description: Used by operators such as IN and NOT_IN.
+          items:
+            oneOf:
+              - type: string
+              - type: number
+              - type: boolean
+        ignoreCase:
+          type: boolean
+          default: false
+          description: |
+            String comparison option.
+            Applies only when the targeted column is a string and the operator is one of:
+            EQ, NEQ, IN, NOT_IN, CONTAINS, NOT_CONTAINS, STARTS_WITH, NOT_STARTS_WITH, ENDS_WITH, NOT_ENDS_WITH.
+            If used with a non-string column or an incompatible operator, the API should return 422.
+
+    AggregationRequest:
+      type: object
+      properties:
+        groupedBy:
+          type: array
+          items:
+            type: string
+        functions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AggregationFunction'
+
+    AggregationFunction:
+      type: object
+      required:
+        - column
+        - function
+      properties:
+        column:
+          type: string
+        function:
+          type: string
+          enum:
+            - SUM
+            - COUNT
+            - MIN
+            - MAX
+            - AVG
+        alias:
+          type: string
+
+    ViewType:
+      type: string
+      enum:
+        - FILTER
+        - JOIN
+
+    ViewSummary:
+      type: object
+      required:
+        - id
+        - name
+        - type
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/ViewType'
+        sourceTableId:
+          type: string
+        cacheSupported:
+          type: boolean
+          default: false
+          description: Always false in the current specification because logical views do not have their own cache.
+
+    ViewDetail:
+      allOf:
+        - $ref: '#/components/schemas/ViewSummary'
+        - type: object
+          properties:
+            query:
+              $ref: '#/components/schemas/TableQueryRequest'
+            join:
+              $ref: '#/components/schemas/JoinDefinition'
+
+    PagedViewSummary:
+      type: object
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ViewSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+
+    ViewCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/ViewUpsertBase'
+        - type: object
+          required:
+            - name
+            - type
+
+    ViewUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/ViewUpsertBase'
+
+    ViewUpsertBase:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/ViewType'
+        sourceTableId:
+          type: string
+        query:
+          $ref: '#/components/schemas/TableQueryRequest'
+        join:
+          $ref: '#/components/schemas/JoinDefinition'
+
+    JoinDefinition:
+      type: object
+      required:
+        - leftSourceId
+        - rightSourceId
+        - joinType
+        - conditions
+      properties:
+        leftSourceId:
+          type: string
+        rightSourceId:
+          type: string
+        joinType:
+          type: string
+          enum:
+            - INNER
+            - LEFT
+            - RIGHT
+            - FULL
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/JoinCondition'
+
+    JoinCondition:
+      type: object
+      required:
+        - leftColumn
+        - operator
+        - rightColumn
+      properties:
+        leftColumn:
+          type: string
+        operator:
+          type: string
+          enum:
+            - EQ
+            - NEQ
+            - GT
+            - GTE
+            - LT
+            - LTE
+        rightColumn:
+          type: string
+
+    CustomColumn:
+      oneOf:
+        - $ref: '#/components/schemas/ArithmeticCustomColumn'
+        - $ref: '#/components/schemas/ConditionalCustomColumn'
+      discriminator:
+        propertyName: kind
+        mapping:
+          ARITHMETIC: '#/components/schemas/ArithmeticCustomColumn'
+          CONDITIONAL: '#/components/schemas/ConditionalCustomColumn'
+
+    ArithmeticCustomColumn:
+      type: object
+      required:
+        - kind
+        - name
+        - expression
+      properties:
+        kind:
+          type: string
+          const: ARITHMETIC
+        name:
+          type: string
+        expression:
+          type: string
+
+    ConditionalCustomColumn:
+      type: object
+      required:
+        - kind
+        - name
+        - cases
+      properties:
+        kind:
+          type: string
+          const: CONDITIONAL
+        name:
+          type: string
+        cases:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionalCase'
+        defaultValue:
+          type: string
+
+    ConditionalCase:
+      type: object
+      required:
+        - when
+        - value
+      properties:
+        when:
+          $ref: '#/components/schemas/FilterGroup'
+        value:
+          type: string
+
+    JobAcceptedResponse:
+      type: object
+      required:
+        - jobId
+        - status
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
