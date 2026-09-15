@@ -33,3 +33,16 @@ api/target
 
 api-docs.json
 *.mv.db
+
+# Agent tools generated files
+.bin/
+project-graph.json
+graphify-out/
+
+
+# MemPalace per-project files (issue #185)
+mempalace.yaml
+entities.json
+
+.venv
+.env
