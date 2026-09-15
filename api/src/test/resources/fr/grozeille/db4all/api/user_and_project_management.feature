@@ -16,6 +16,9 @@ Feature: User and Project Management Flows
     Then the project "My First Project" is created successfully
     And I see 1 project when I list all projects
 
+    When I create a local datasource named "Local Files" for this project
+    Then the datasource "Local Files" is created successfully
+
     When I create a new table named "My First Table" for this project
     Then the table "My First Table" is created successfully
     And I see 1 table when I list all tables for this project

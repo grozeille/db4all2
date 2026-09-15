@@ -40,7 +40,9 @@ export default function TableListPage() {
       <div className="d-flex align-items-start justify-content-between mb-4">
         <h2 className="mb-0">Tables of project {projectName || projectId}</h2>
         <div>
-          <button className="btn btn-primary me-2" onClick={() => navigate(`/projects/${projectId}/settings`, { state: { projectName } })}>Settings</button>
+          {project?.administrator && (
+            <button className="btn btn-primary me-2" onClick={() => navigate(`/projects/${projectId}/settings`, { state: { projectName } })}>Settings</button>
+          )}
           <button
             className="btn btn-primary"
             onClick={() => navigate(`/projects/${projectId}/tables/new`, { state: { projectName } })}

@@ -13,4 +13,7 @@ public interface TableRepository extends JpaRepository<Table, String> {
     Page<Table> findByProjectIdAndNameContainingIgnoreCase(String projectId, String name, Pageable pageable);
     Optional<Table> findByIdAndProjectId(String id, String projectId);
     boolean existsByIdAndProjectId(String id, String projectId);
+    boolean existsByProjectIdAndNameIgnoreCase(String projectId, String name);
+    boolean existsByProjectIdAndNameIgnoreCaseAndIdNot(String projectId, String name, String id);
+    boolean existsByDatasourceId(String datasourceId);
 }

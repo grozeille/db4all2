@@ -4,7 +4,9 @@ import fr.grozeille.db4all.api.dto.*;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.service.UserService;
 import fr.grozeille.db4all.api.exceptions.PasswordTooWeakException;
+import fr.grozeille.db4all.api.exceptions.SelfStatusChangeForbiddenException;
 import fr.grozeille.db4all.api.exceptions.UserAlreadyExistsException;
+import fr.grozeille.db4all.api.exceptions.UserNotFoundException;
 import fr.grozeille.db4all.api.exceptions.WrongPasswordException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -156,7 +158,7 @@ public class UserController {
     })
     @PutMapping("/{email}/superadmin")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<UserDto> updateSuperAdminStatus(@PathVariable String email, @RequestBody UpdateSuperAdminRequest request, Authentication authentication) {
+    public ResponseEntity<?> updateSuperAdminStatus(@PathVariable String email, @RequestBody UpdateSuperAdminRequest request, Authentication authentication) {
         try {
             User updatedUser = userService.updateSuperAdminStatus(email, request.isSuperAdmin(), authentication);
             return ResponseEntity.ok(modelMapper.map(updatedUser, UserDto.class));

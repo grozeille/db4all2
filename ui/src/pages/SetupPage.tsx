@@ -41,8 +41,10 @@ const SetupPage: React.FC = () => {
         }
 
         try {
-            await performInit(email, password);
-            navigate('/login', { state: { message: 'Application initialized successfully! Please log in.' } });
+            const result = await performInit(email, password);
+            if (result) {
+                navigate('/login', { state: { message: 'Application initialized successfully! Please log in.' } });
+            }
         } catch (err) {
             // The useApi hook handles setting the apiError state.
             // We just need to catch the promise rejection to prevent unhandled promise errors.

@@ -14,25 +14,29 @@ When we click on a table, we go to the page /projects/{project_id}/tables/{table
 
 It displays a grid (AG Grid) with the data.
 
+For the MVP, the grid shows at most 1000 rows per query preview.
+
 On the top right, if I have writer/administrator role, I can see a button "Configure" and "Add" button.
+
+There is also an "Export CSV" action to download the full result of the current query.
 
 ### Map CSV file to a table
 
 When I click on "Add" button, the content of the table is replaced by a new screen.
 I can provide a name and a type using a select box:
 - CSV
-- Excel
-- Parquest files
-- Iceberg table
-- PostgreSQL table
+- Parquet files
 
-When I select CSV, I must choose a select box a CIFS or S3 data source (list of names).
+For the MVP, only CSV and Parquet files are available in this selector.
+
+Excel and PostgreSQL mappings are postponed to a later version.
+
+When I select CSV, I must choose a datasource from the list of datasources configured for the project.
 
 I now have a section "configuration" with the folowing options:
 - Path (textbox) Ex: *.csv, or subfolder/file.csv
 - Separator (textbox)
 - First row as header (checkbox)
-
 
 If the data-source is not read-only, I can also click on a "upload" button to upload a file to the selected path, the path will be renamed to target the new file uploaded. A popup is displayed "please wait" to wait for the upload to be completed.
 
@@ -40,6 +44,8 @@ I can click on the botton of the screen on "Cancel" or "Save".
 When "save", it will call the API POST /projects/{project_id}/tables which will return a JSON response with the id of the created table, so the UI can redirect to /projects/{project_id}/tables/{table_id}/content
 
 When the user click on "Configure" button in the table view, it displays the same screen but can't change the type and data-source, but can change the name, the fields of the "configuration" section.
+
+More details about datasource types and upload policy are defined in SPECS_DATASOURCES.md.
 
 ### Map Excel file to a table
 
@@ -71,6 +77,10 @@ Next to the "Add a condition" button, we can also clic on "Add a group".
 On the left of "Add a condition" we have a select box to choose "And" or "Or", to use that AND/OR between all conditions of the group. There's also a "remove" button to remove a condition or a group.
 
 On the top right, next to "Configure" button, there's a "Refresh" button: it will refresh the data and apply the filter.
+
+If the table uses a cache, the Refresh button refreshes the displayed data from the current active cache or source. Cache refresh scheduling and cache invalidation are configured in the table settings.
+
+The preview grid does not display a total result count and does not rely on a hasMore indicator.
 
 ### Apply aggregation to a table
 
@@ -123,6 +133,20 @@ And the other sections (aggregation, columns, custom columns, etc.)
 And bellow, we can see the grid with the content.
 
 When we click "save" it will save our filters.
+
+This saved result is considered a logical view unless the user explicitly materializes it as a new physical table.
+
+Views can save:
+- filters
+- select/hide columns
+- rename columns
+- joins between 2 sources
+
+Views do not have their own cache.
+
+More details about views are defined in SPECS_DATASOURCES.md.
+
+If the user needs a full extract of the result, the UI uses a dedicated CSV export endpoint rather than loading the full result in the browser.
 
 ### Delete a table
 

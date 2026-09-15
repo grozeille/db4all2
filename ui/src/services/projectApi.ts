@@ -4,6 +4,15 @@ import { getAuthHeaders } from "./utils";
 
 const API_URL = '/api/v2/projects';
 
+async function buildApiError(response: Response): Promise<Error> {
+  const errorJson = await response.json().catch(() => null);
+  if (errorJson && typeof errorJson.message === 'string') {
+    return new Error(errorJson.message);
+  }
+
+  return new Error(`Error ${response.status}`);
+}
+
 interface Pageable {
   page?: number;
   size?: number;
@@ -28,7 +37,7 @@ export async function getProjects(search: string = '', pageable: Pageable = { pa
   }
 
   const res = await fetch(`${API_URL}?${params.toString()}`, { headers: getAuthHeaders() });
-  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+  if (!res.ok) throw await buildApiError(res);
   return await res.json();
 }
 
@@ -37,7 +46,7 @@ export async function getProject(id: string): Promise<Project> {
   const res = await fetch(`${API_URL}/${id}`, { headers: getAuthHeaders() });
   if (!res.ok) {
     if (res.status === 404) throw new Error('Projet introuvable');
-    throw new Error(`Erreur ${res.status}`);
+    throw await buildApiError(res);
   }
   return await res.json();
 }
@@ -49,8 +58,7 @@ export async function createProject(data: Partial<Project>): Promise<Project> {
     body: JSON.stringify(data)
   });
   if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `Erreur ${res.status}`);
+    throw await buildApiError(res);
   }
   return await res.json();
 }
@@ -62,8 +70,7 @@ export async function updateProject(id: string, data: Partial<Project>): Promise
     body: JSON.stringify(data)
   });
   if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `Erreur ${res.status}`);
+    throw await buildApiError(res);
   }
   return await res.json();
 }
@@ -74,7 +81,34 @@ export async function deleteProject(id: string): Promise<void> {
       headers: getAuthHeaders()
     });
   if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `Erreur ${res.status}`);
+    throw await buildApiError(res);
+  }
+}
+
+export async function getAvailableProjectAdministrators(id: string): Promise<string[]> {
+  const res = await fetch(`${API_URL}/${id}/administrators/available-users`, { headers: getAuthHeaders() });
+  if (!res.ok) {
+    throw await buildApiError(res);
+  }
+  return await res.json();
+}
+
+export async function addProjectAdministrator(id: string, email: string): Promise<void> {
+  const res = await fetch(`${API_URL}/${id}/administrators/${encodeURIComponent(email)}`, {
+    method: 'POST',
+    headers: getAuthHeaders()
+  });
+  if (!res.ok) {
+    throw await buildApiError(res);
+  }
+}
+
+export async function removeProjectAdministrator(id: string, email: string): Promise<void> {
+  const res = await fetch(`${API_URL}/${id}/administrators/${encodeURIComponent(email)}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+  if (!res.ok) {
+    throw await buildApiError(res);
   }
 }

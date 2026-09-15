@@ -1,4 +1,4 @@
-import type { Table } from '../types/table';
+import type { Table, TableQueryRequest, TableQueryResponse, TableUpsertRequest } from '../types/table';
 import type { Page } from '../types/page';
 import { getAuthHeaders } from "./utils";
 
@@ -28,7 +28,7 @@ export async function getTables(projectId: string, search: string = '', pageable
   }
 
   const res = await fetch(`${API_URL}/${projectId}/tables?${params.toString()}`, { headers: getAuthHeaders() });
-  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+  if (!res.ok) throw new Error(`Unable to load tables (${res.status})`);
   return await res.json();
 }
 
@@ -37,13 +37,13 @@ export async function getTable(projectId: string, tableId: string): Promise<Tabl
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     if (err.message) throw new Error(err.message);
-    if (res.status === 404) throw new Error('Table introuvable');
-    throw new Error(`Erreur ${res.status}`);
+    if (res.status === 404) throw new Error('Table not found');
+    throw new Error(`Unable to load table (${res.status})`);
   }
   return await res.json();
 }
 
-export async function createTable(projectId: string, data: Partial<Table>): Promise<Table> {
+export async function createTable(projectId: string, data: TableUpsertRequest): Promise<Table> {
   const res = await fetch(`${API_URL}/${projectId}/tables`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -51,12 +51,12 @@ export async function createTable(projectId: string, data: Partial<Table>): Prom
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Erreur ${res.status}`);
+    throw new Error(err.message || `Unable to create table (${res.status})`);
   }
   return await res.json();
 }
 
-export async function updateTable(projectId: string, tableId: string, data: Partial<Table>): Promise<void> {
+export async function updateTable(projectId: string, tableId: string, data: TableUpsertRequest): Promise<Table> {
   const res = await fetch(`${API_URL}/${projectId}/tables/${tableId}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
@@ -64,8 +64,9 @@ export async function updateTable(projectId: string, tableId: string, data: Part
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Erreur ${res.status}`);
+    throw new Error(err.message || `Unable to update table (${res.status})`);
   }
+  return await res.json();
 }
 
 export async function deleteTable(projectId: string, tableId: string): Promise<void> {
@@ -75,6 +76,19 @@ export async function deleteTable(projectId: string, tableId: string): Promise<v
     });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Erreur ${res.status}`);
+    throw new Error(err.message || `Unable to delete table (${res.status})`);
   }
+}
+
+export async function queryTable(projectId: string, tableId: string, data: TableQueryRequest): Promise<TableQueryResponse> {
+  const res = await fetch(`${API_URL}/${projectId}/tables/${tableId}/query`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Unable to query table (${res.status})`);
+  }
+  return await res.json();
 }

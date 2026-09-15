@@ -1,0 +1,20 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.import.exclusions": [
+        "ui/**"
+    ],
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/node_modules/**": true,
+        "**/target/**": true,
+        "**/bin/**": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        "npm run build": true,
+        "mvn -f api/pom.xml": true,
+        "/^mvn -q -f api/pom\\.xml dependency:build-classpath -Dmdep\\.outputFile=/tmp/db4all-api\\.cp && echo ready$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

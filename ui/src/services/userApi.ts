@@ -14,6 +14,9 @@ export const userApi = {
   adminUpdatePassword: async function(login: string, request: UpdatePasswordRequest): Promise<boolean> {
     return await api.put<void>(`/api/v2/users/${login}/password`, request) as boolean;
   },
+  updateSuperAdminStatus: async function(login: string, superAdmin: boolean): Promise<User | boolean> {
+    return await api.put<User>(`/api/v2/users/${login}/superadmin`, { superAdmin });
+  },
   updateMyPassword: async function(request: UpdatePasswordRequest) {
     return await api.put<void>("/api/v2/users/password", request);
   }
