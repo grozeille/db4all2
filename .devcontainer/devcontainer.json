@@ -13,14 +13,14 @@
         "VITE_PORT": "5173",
         "VITE_API_PROXY_TARGET": "http://127.0.0.1:8080"
     },
-    "features": {
-        "ghcr.io/devcontainers/features/java:1": {
-            "version": "21"
-        },
-        "ghcr.io/devcontainers/features/node:1": {
-            "version": "22"
-        }
+    "remoteEnv": {
+        "META_API_KEY": "${localEnv:META_API_KEY}"
     },
+    // No "features": the universal image already ships Java 21, Maven and Node 22.
+    // Keeping the java/node features would only re-download them via SDKMAN at build time.
+    "mounts": [
+        "source=/run/user/1000/podman/podman.sock,target=/var/run/docker.sock,type=bind"
+    ],
     "forwardPorts": [8080, 5173],
     "portsAttributes": {
         "8080": {
@@ -36,7 +36,9 @@
     },
     "postCreateCommand": {
         "api-dependencies": "mkdir -p /workspaces/db4all2/.data && mvn -f api/pom.xml -DskipTests test-compile",
-        "ui-dependencies": "npm --prefix ui ci"
+        "install-bwrap": "sudo apt-get update && sudo apt-get install -y bubblewrap || echo 'WARNING: bubblewrap install failed (muse sandbox will not work)'",
+        "ui-dependencies": "npm --prefix ui ci",
+        "install-muse": "command -v muse >/dev/null 2>&1 || (curl -fsSL https://dev.meta.ai/install.sh | bash && sudo ln -sf $HOME/.local/bin/muse /usr/local/bin/muse) || echo 'WARNING: muse install failed (non-blocking)'"
     },
     "customizations": {
         "vscode": {

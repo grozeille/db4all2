@@ -16,5 +16,13 @@
             "approve": true,
             "matchCommandLine": true
         }
+    },
+    "workbench.colorCustomizations": {
+        "terminal.background": "#0C0C0C",
+        "terminal.foreground": "#CCCCCC"
     }
+    // NOTE: when the Dev Containers host is WSL-Ubuntu with rootless podman,
+    // set these in your USER settings (application scope, workspace is ignored):
+    //   "dev.containers.dockerPath": "/usr/bin/podman",
+    //   "dev.containers.dockerSocketPath": "/run/user/1000/podman/podman.sock"
 }
