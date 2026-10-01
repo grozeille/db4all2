@@ -36,7 +36,6 @@
     },
     "postCreateCommand": {
         "api-dependencies": "mkdir -p /workspaces/db4all2/.data && mvn -f api/pom.xml -DskipTests test-compile",
-        "install-bwrap": "sudo apt-get update && sudo apt-get install -y bubblewrap || echo 'WARNING: bubblewrap install failed (muse sandbox will not work)'",
         "ui-dependencies": "npm --prefix ui ci",
         "install-muse": "command -v muse >/dev/null 2>&1 || (curl -fsSL https://dev.meta.ai/install.sh | bash && sudo ln -sf $HOME/.local/bin/muse /usr/local/bin/muse) || echo 'WARNING: muse install failed (non-blocking)'"
     },
