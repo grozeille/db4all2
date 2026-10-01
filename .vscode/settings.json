@@ -21,7 +21,8 @@
     "workbench.colorCustomizations": {
         "terminal.background": "#0C0C0C",
         "terminal.foreground": "#CCCCCC"
-    }
+    },
+    "java.dependency.packagePresentation": "hierarchical"
     // NOTE: when the Dev Containers host is WSL-Ubuntu with rootless podman,
     // set these in your USER settings (application scope, workspace is ignored):
     //   "dev.containers.dockerPath": "/usr/bin/podman",
