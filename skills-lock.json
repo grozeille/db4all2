@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "markdown-kanban": {
+      "source": "holooooo/markdown-kanban",
+      "sourceType": "github",
+      "skillPath": "skills/markdown-kanban/SKILL.md",
+      "computedHash": "7f1680b929ad91f2962eb934f4f5aaf8d2a89d1f3b16fc8cb77f8d4856d1ab77"
+    }
+  }
+}
