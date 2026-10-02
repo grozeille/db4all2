@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 import { createView } from '../services/viewApi';
 import { getTable, queryTable } from '../services/tableApi';
 import 'ag-grid-community/styles/ag-theme-alpine.css';

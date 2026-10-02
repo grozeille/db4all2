@@ -1,0 +1,501 @@
+product_id;name;category;price_eur;stock_qty
+1;Clavier Mecanique 01;Informatique;429.04;57
+2;Clavier Mecanique 02;Informatique;26.38;379
+3;Clavier Mecanique 03;Informatique;190.23;125
+4;Clavier Mecanique 04;Informatique;156.27;71
+5;Clavier Mecanique 05;Informatique;492.64;52
+6;Clavier Mecanique 06;Informatique;453.47;379
+7;Clavier Mecanique 07;Informatique;367.40;44
+8;Clavier Mecanique 08;Informatique;396.97;216
+9;Clavier Mecanique 09;Informatique;30.81;15
+10;Clavier Mecanique 10;Informatique;71.39;111
+11;Souris Sans Fil 01;Informatique;162.46;258
+12;Souris Sans Fil 02;Informatique;404.52;13
+13;Souris Sans Fil 03;Informatique;377.80;101
+14;Souris Sans Fil 04;Informatique;479.24;332
+15;Souris Sans Fil 05;Informatique;469.61;279
+16;Souris Sans Fil 06;Informatique;284.92;112
+17;Souris Sans Fil 07;Informatique;304.38;301
+18;Souris Sans Fil 08;Informatique;192.30;414
+19;Souris Sans Fil 09;Informatique;14.24;388
+20;Souris Sans Fil 10;Informatique;114.62;357
+21;Ecran 27 pouces 01;Informatique;286.95;174
+22;Ecran 27 pouces 02;Informatique;192.09;79
+23;Ecran 27 pouces 03;Informatique;151.09;490
+24;Ecran 27 pouces 04;Informatique;230.58;52
+25;Ecran 27 pouces 05;Informatique;70.77;194
+26;Ecran 27 pouces 06;Informatique;73.37;183
+27;Ecran 27 pouces 07;Informatique;235.40;309
+28;Ecran 27 pouces 08;Informatique;183.34;413
+29;Ecran 27 pouces 09;Informatique;38.46;373
+30;Ecran 27 pouces 10;Informatique;311.07;274
+31;Casque USB 01;Informatique;91.79;498
+32;Casque USB 02;Informatique;258.06;40
+33;Casque USB 03;Informatique;371.77;150
+34;Casque USB 04;Informatique;421.97;316
+35;Casque USB 05;Informatique;246.99;295
+36;Casque USB 06;Informatique;136.00;360
+37;Casque USB 07;Informatique;55.57;23
+38;Casque USB 08;Informatique;443.35;116
+39;Casque USB 09;Informatique;199.64;40
+40;Casque USB 10;Informatique;162.55;443
+41;Webcam HD 01;Informatique;76.18;194
+42;Webcam HD 02;Informatique;192.16;232
+43;Webcam HD 03;Informatique;426.59;427
+44;Webcam HD 04;Informatique;249.08;83
+45;Webcam HD 05;Informatique;252.59;181
+46;Webcam HD 06;Informatique;147.29;343
+47;Webcam HD 07;Informatique;184.95;359
+48;Webcam HD 08;Informatique;457.95;331
+49;Webcam HD 09;Informatique;56.78;311
+50;Webcam HD 10;Informatique;426.12;87
+51;Coque Renforcee 01;Telephonie;360.04;373
+52;Coque Renforcee 02;Telephonie;170.42;83
+53;Coque Renforcee 03;Telephonie;312.93;194
+54;Coque Renforcee 04;Telephonie;186.90;473
+55;Coque Renforcee 05;Telephonie;429.42;352
+56;Coque Renforcee 06;Telephonie;374.99;112
+57;Coque Renforcee 07;Telephonie;458.65;166
+58;Coque Renforcee 08;Telephonie;46.64;117
+59;Coque Renforcee 09;Telephonie;31.02;412
+60;Coque Renforcee 10;Telephonie;216.72;205
+61;Chargeur Rapide 01;Telephonie;185.45;33
+62;Chargeur Rapide 02;Telephonie;148.25;467
+63;Chargeur Rapide 03;Telephonie;381.69;448
+64;Chargeur Rapide 04;Telephonie;480.48;161
+65;Chargeur Rapide 05;Telephonie;149.33;335
+66;Chargeur Rapide 06;Telephonie;337.16;202
+67;Chargeur Rapide 07;Telephonie;431.28;234
+68;Chargeur Rapide 08;Telephonie;103.62;135
+69;Chargeur Rapide 09;Telephonie;101.49;126
+70;Chargeur Rapide 10;Telephonie;498.22;287
+71;Ecouteurs Bluetooth 01;Telephonie;363.21;134
+72;Ecouteurs Bluetooth 02;Telephonie;499.55;299
+73;Ecouteurs Bluetooth 03;Telephonie;290.76;459
+74;Ecouteurs Bluetooth 04;Telephonie;392.41;204
+75;Ecouteurs Bluetooth 05;Telephonie;247.22;112
+76;Ecouteurs Bluetooth 06;Telephonie;100.64;260
+77;Ecouteurs Bluetooth 07;Telephonie;333.42;46
+78;Ecouteurs Bluetooth 08;Telephonie;40.86;440
+79;Ecouteurs Bluetooth 09;Telephonie;81.84;78
+80;Ecouteurs Bluetooth 10;Telephonie;421.19;81
+81;Support Voiture 01;Telephonie;455.95;216
+82;Support Voiture 02;Telephonie;400.85;32
+83;Support Voiture 03;Telephonie;262.15;195
+84;Support Voiture 04;Telephonie;400.51;239
+85;Support Voiture 05;Telephonie;356.75;128
+86;Support Voiture 06;Telephonie;372.55;440
+87;Support Voiture 07;Telephonie;17.51;348
+88;Support Voiture 08;Telephonie;482.32;58
+89;Support Voiture 09;Telephonie;456.75;453
+90;Support Voiture 10;Telephonie;361.89;384
+91;Cable USB-C 01;Telephonie;184.85;393
+92;Cable USB-C 02;Telephonie;430.05;174
+93;Cable USB-C 03;Telephonie;83.09;150
+94;Cable USB-C 04;Telephonie;294.91;80
+95;Cable USB-C 05;Telephonie;307.34;1
+96;Cable USB-C 06;Telephonie;483.22;448
+97;Cable USB-C 07;Telephonie;481.63;134
+98;Cable USB-C 08;Telephonie;338.05;390
+99;Cable USB-C 09;Telephonie;127.07;259
+100;Cable USB-C 10;Telephonie;79.72;445
+101;Enceinte Portable 01;Audio;419.78;152
+102;Enceinte Portable 02;Audio;428.73;259
+103;Enceinte Portable 03;Audio;409.08;101
+104;Enceinte Portable 04;Audio;110.15;191
+105;Enceinte Portable 05;Audio;115.86;276
+106;Enceinte Portable 06;Audio;357.56;470
+107;Enceinte Portable 07;Audio;10.36;306
+108;Enceinte Portable 08;Audio;222.42;250
+109;Enceinte Portable 09;Audio;22.75;57
+110;Enceinte Portable 10;Audio;247.87;449
+111;Barre de Son 01;Audio;211.52;122
+112;Barre de Son 02;Audio;47.95;123
+113;Barre de Son 03;Audio;381.81;484
+114;Barre de Son 04;Audio;61.60;43
+115;Barre de Son 05;Audio;489.65;248
+116;Barre de Son 06;Audio;55.34;500
+117;Barre de Son 07;Audio;359.10;392
+118;Barre de Son 08;Audio;92.40;65
+119;Barre de Son 09;Audio;442.36;243
+120;Barre de Son 10;Audio;370.30;84
+121;Casque Studio 01;Audio;183.69;270
+122;Casque Studio 02;Audio;407.52;216
+123;Casque Studio 03;Audio;148.79;475
+124;Casque Studio 04;Audio;363.42;386
+125;Casque Studio 05;Audio;488.35;353
+126;Casque Studio 06;Audio;141.81;365
+127;Casque Studio 07;Audio;214.27;204
+128;Casque Studio 08;Audio;450.18;332
+129;Casque Studio 09;Audio;254.71;224
+130;Casque Studio 10;Audio;349.18;231
+131;Platine Vinyle 01;Audio;89.29;126
+132;Platine Vinyle 02;Audio;157.24;32
+133;Platine Vinyle 03;Audio;231.55;10
+134;Platine Vinyle 04;Audio;395.54;283
+135;Platine Vinyle 05;Audio;160.79;301
+136;Platine Vinyle 06;Audio;154.31;3
+137;Platine Vinyle 07;Audio;56.51;362
+138;Platine Vinyle 08;Audio;423.58;30
+139;Platine Vinyle 09;Audio;160.02;34
+140;Platine Vinyle 10;Audio;30.57;440
+141;Ampli Compact 01;Audio;226.53;36
+142;Ampli Compact 02;Audio;346.94;121
+143;Ampli Compact 03;Audio;192.49;342
+144;Ampli Compact 04;Audio;328.11;109
+145;Ampli Compact 05;Audio;363.38;67
+146;Ampli Compact 06;Audio;484.04;478
+147;Ampli Compact 07;Audio;384.22;295
+148;Ampli Compact 08;Audio;319.75;124
+149;Ampli Compact 09;Audio;319.95;413
+150;Ampli Compact 10;Audio;276.76;97
+151;Lampe LED 01;Maison;71.80;49
+152;Lampe LED 02;Maison;441.86;220
+153;Lampe LED 03;Maison;242.18;216
+154;Lampe LED 04;Maison;279.40;239
+155;Lampe LED 05;Maison;487.79;27
+156;Lampe LED 06;Maison;451.28;334
+157;Lampe LED 07;Maison;433.47;50
+158;Lampe LED 08;Maison;49.71;206
+159;Lampe LED 09;Maison;487.23;173
+160;Lampe LED 10;Maison;81.60;127
+161;Aspirateur Robot 01;Maison;135.55;97
+162;Aspirateur Robot 02;Maison;361.45;229
+163;Aspirateur Robot 03;Maison;101.85;216
+164;Aspirateur Robot 04;Maison;130.24;142
+165;Aspirateur Robot 05;Maison;313.17;127
+166;Aspirateur Robot 06;Maison;59.39;226
+167;Aspirateur Robot 07;Maison;370.65;50
+168;Aspirateur Robot 08;Maison;43.14;333
+169;Aspirateur Robot 09;Maison;364.26;428
+170;Aspirateur Robot 10;Maison;19.66;496
+171;Thermostat Connecte 01;Maison;71.11;474
+172;Thermostat Connecte 02;Maison;164.90;85
+173;Thermostat Connecte 03;Maison;276.33;248
+174;Thermostat Connecte 04;Maison;325.45;109
+175;Thermostat Connecte 05;Maison;272.81;462
+176;Thermostat Connecte 06;Maison;48.41;84
+177;Thermostat Connecte 07;Maison;258.35;1
+178;Thermostat Connecte 08;Maison;265.85;135
+179;Thermostat Connecte 09;Maison;308.18;146
+180;Thermostat Connecte 10;Maison;287.21;356
+181;Serrure Intelligente 01;Maison;488.73;401
+182;Serrure Intelligente 02;Maison;374.21;338
+183;Serrure Intelligente 03;Maison;480.80;249
+184;Serrure Intelligente 04;Maison;111.43;97
+185;Serrure Intelligente 05;Maison;204.44;111
+186;Serrure Intelligente 06;Maison;48.31;296
+187;Serrure Intelligente 07;Maison;492.16;277
+188;Serrure Intelligente 08;Maison;49.93;382
+189;Serrure Intelligente 09;Maison;215.51;29
+190;Serrure Intelligente 10;Maison;42.85;299
+191;Capteur Fumee 01;Maison;322.45;257
+192;Capteur Fumee 02;Maison;358.06;80
+193;Capteur Fumee 03;Maison;47.26;491
+194;Capteur Fumee 04;Maison;342.80;41
+195;Capteur Fumee 05;Maison;131.77;35
+196;Capteur Fumee 06;Maison;399.95;34
+197;Capteur Fumee 07;Maison;452.49;441
+198;Capteur Fumee 08;Maison;164.13;206
+199;Capteur Fumee 09;Maison;88.55;482
+200;Capteur Fumee 10;Maison;383.33;126
+201;Robot Patissier 01;Cuisine;389.39;304
+202;Robot Patissier 02;Cuisine;36.03;317
+203;Robot Patissier 03;Cuisine;63.71;214
+204;Robot Patissier 04;Cuisine;440.80;298
+205;Robot Patissier 05;Cuisine;380.41;267
+206;Robot Patissier 06;Cuisine;217.32;478
+207;Robot Patissier 07;Cuisine;180.88;104
+208;Robot Patissier 08;Cuisine;448.90;366
+209;Robot Patissier 09;Cuisine;215.89;122
+210;Robot Patissier 10;Cuisine;184.06;202
+211;Cafetiere Expresso 01;Cuisine;95.76;343
+212;Cafetiere Expresso 02;Cuisine;433.02;153
+213;Cafetiere Expresso 03;Cuisine;309.63;161
+214;Cafetiere Expresso 04;Cuisine;57.53;4
+215;Cafetiere Expresso 05;Cuisine;310.33;318
+216;Cafetiere Expresso 06;Cuisine;378.95;51
+217;Cafetiere Expresso 07;Cuisine;58.00;275
+218;Cafetiere Expresso 08;Cuisine;149.68;259
+219;Cafetiere Expresso 09;Cuisine;183.79;67
+220;Cafetiere Expresso 10;Cuisine;238.71;451
+221;Friteuse Air Chaud 01;Cuisine;55.07;450
+222;Friteuse Air Chaud 02;Cuisine;170.08;189
+223;Friteuse Air Chaud 03;Cuisine;196.75;80
+224;Friteuse Air Chaud 04;Cuisine;297.15;426
+225;Friteuse Air Chaud 05;Cuisine;365.99;360
+226;Friteuse Air Chaud 06;Cuisine;208.24;313
+227;Friteuse Air Chaud 07;Cuisine;438.57;270
+228;Friteuse Air Chaud 08;Cuisine;15.11;341
+229;Friteuse Air Chaud 09;Cuisine;373.45;153
+230;Friteuse Air Chaud 10;Cuisine;444.74;53
+231;Balance Connectee 01;Cuisine;97.99;135
+232;Balance Connectee 02;Cuisine;85.63;455
+233;Balance Connectee 03;Cuisine;80.13;380
+234;Balance Connectee 04;Cuisine;372.55;79
+235;Balance Connectee 05;Cuisine;188.47;144
+236;Balance Connectee 06;Cuisine;406.37;107
+237;Balance Connectee 07;Cuisine;480.28;175
+238;Balance Connectee 08;Cuisine;143.41;351
+239;Balance Connectee 09;Cuisine;425.64;436
+240;Balance Connectee 10;Cuisine;182.99;258
+241;Couteau Chef 01;Cuisine;330.15;128
+242;Couteau Chef 02;Cuisine;43.28;47
+243;Couteau Chef 03;Cuisine;425.67;216
+244;Couteau Chef 04;Cuisine;191.31;22
+245;Couteau Chef 05;Cuisine;12.31;170
+246;Couteau Chef 06;Cuisine;95.72;326
+247;Couteau Chef 07;Cuisine;181.66;82
+248;Couteau Chef 08;Cuisine;495.76;226
+249;Couteau Chef 09;Cuisine;371.53;361
+250;Couteau Chef 10;Cuisine;290.27;287
+251;Montre GPS 01;Sport;16.32;57
+252;Montre GPS 02;Sport;59.30;483
+253;Montre GPS 03;Sport;462.85;462
+254;Montre GPS 04;Sport;107.67;279
+255;Montre GPS 05;Sport;33.60;427
+256;Montre GPS 06;Sport;251.95;298
+257;Montre GPS 07;Sport;372.09;75
+258;Montre GPS 08;Sport;291.65;65
+259;Montre GPS 09;Sport;37.40;157
+260;Montre GPS 10;Sport;248.96;460
+261;Tapis de Yoga 01;Sport;36.13;460
+262;Tapis de Yoga 02;Sport;244.48;107
+263;Tapis de Yoga 03;Sport;456.98;127
+264;Tapis de Yoga 04;Sport;447.07;52
+265;Tapis de Yoga 05;Sport;241.77;399
+266;Tapis de Yoga 06;Sport;376.91;452
+267;Tapis de Yoga 07;Sport;276.31;498
+268;Tapis de Yoga 08;Sport;416.74;383
+269;Tapis de Yoga 09;Sport;111.27;473
+270;Tapis de Yoga 10;Sport;165.13;442
+271;Haltere Modulable 01;Sport;116.48;499
+272;Haltere Modulable 02;Sport;126.02;451
+273;Haltere Modulable 03;Sport;280.19;12
+274;Haltere Modulable 04;Sport;127.53;377
+275;Haltere Modulable 05;Sport;227.69;400
+276;Haltere Modulable 06;Sport;279.81;410
+277;Haltere Modulable 07;Sport;449.02;442
+278;Haltere Modulable 08;Sport;491.71;415
+279;Haltere Modulable 09;Sport;172.62;136
+280;Haltere Modulable 10;Sport;114.32;403
+281;Velo Elliptique 01;Sport;469.57;55
+282;Velo Elliptique 02;Sport;260.69;446
+283;Velo Elliptique 03;Sport;35.36;439
+284;Velo Elliptique 04;Sport;318.46;113
+285;Velo Elliptique 05;Sport;140.78;418
+286;Velo Elliptique 06;Sport;311.65;179
+287;Velo Elliptique 07;Sport;209.99;420
+288;Velo Elliptique 08;Sport;159.14;114
+289;Velo Elliptique 09;Sport;25.49;337
+290;Velo Elliptique 10;Sport;136.55;204
+291;Gourde Isotherme 01;Sport;225.11;142
+292;Gourde Isotherme 02;Sport;55.48;495
+293;Gourde Isotherme 03;Sport;192.91;179
+294;Gourde Isotherme 04;Sport;430.39;260
+295;Gourde Isotherme 05;Sport;271.92;347
+296;Gourde Isotherme 06;Sport;361.40;169
+297;Gourde Isotherme 07;Sport;28.07;59
+298;Gourde Isotherme 08;Sport;181.17;91
+299;Gourde Isotherme 09;Sport;390.48;492
+300;Gourde Isotherme 10;Sport;183.96;19
+301;Circuit Voiture 01;Jouets;81.03;305
+302;Circuit Voiture 02;Jouets;294.78;176
+303;Circuit Voiture 03;Jouets;487.44;402
+304;Circuit Voiture 04;Jouets;215.56;223
+305;Circuit Voiture 05;Jouets;407.27;261
+306;Circuit Voiture 06;Jouets;85.77;197
+307;Circuit Voiture 07;Jouets;387.86;97
+308;Circuit Voiture 08;Jouets;176.92;22
+309;Circuit Voiture 09;Jouets;474.49;223
+310;Circuit Voiture 10;Jouets;11.09;266
+311;Poupee Interactive 01;Jouets;362.86;351
+312;Poupee Interactive 02;Jouets;481.47;481
+313;Poupee Interactive 03;Jouets;496.23;377
+314;Poupee Interactive 04;Jouets;449.49;100
+315;Poupee Interactive 05;Jouets;248.68;220
+316;Poupee Interactive 06;Jouets;55.84;485
+317;Poupee Interactive 07;Jouets;445.30;471
+318;Poupee Interactive 08;Jouets;226.38;319
+319;Poupee Interactive 09;Jouets;215.71;339
+320;Poupee Interactive 10;Jouets;91.66;368
+321;Jeu de Construction 01;Jouets;206.80;259
+322;Jeu de Construction 02;Jouets;212.68;341
+323;Jeu de Construction 03;Jouets;277.63;167
+324;Jeu de Construction 04;Jouets;273.70;356
+325;Jeu de Construction 05;Jouets;203.75;283
+326;Jeu de Construction 06;Jouets;93.40;98
+327;Jeu de Construction 07;Jouets;285.53;340
+328;Jeu de Construction 08;Jouets;258.46;346
+329;Jeu de Construction 09;Jouets;124.04;315
+330;Jeu de Construction 10;Jouets;382.95;154
+331;Drone Junior 01;Jouets;276.11;280
+332;Drone Junior 02;Jouets;10.25;155
+333;Drone Junior 03;Jouets;198.02;107
+334;Drone Junior 04;Jouets;291.72;402
+335;Drone Junior 05;Jouets;390.08;310
+336;Drone Junior 06;Jouets;439.05;164
+337;Drone Junior 07;Jouets;314.72;226
+338;Drone Junior 08;Jouets;299.76;345
+339;Drone Junior 09;Jouets;150.04;261
+340;Drone Junior 10;Jouets;320.09;406
+341;Puzzle 3D 01;Jouets;492.30;86
+342;Puzzle 3D 02;Jouets;441.77;43
+343;Puzzle 3D 03;Jouets;195.97;263
+344;Puzzle 3D 04;Jouets;445.05;324
+345;Puzzle 3D 05;Jouets;415.82;171
+346;Puzzle 3D 06;Jouets;71.19;419
+347;Puzzle 3D 07;Jouets;163.91;344
+348;Puzzle 3D 08;Jouets;213.42;115
+349;Puzzle 3D 09;Jouets;140.49;75
+350;Puzzle 3D 10;Jouets;25.99;23
+351;Roman Policier 01;Livres;170.45;243
+352;Roman Policier 02;Livres;410.59;435
+353;Roman Policier 03;Livres;57.71;233
+354;Roman Policier 04;Livres;281.59;453
+355;Roman Policier 05;Livres;422.71;294
+356;Roman Policier 06;Livres;137.41;367
+357;Roman Policier 07;Livres;466.35;196
+358;Roman Policier 08;Livres;333.98;204
+359;Roman Policier 09;Livres;169.88;75
+360;Roman Policier 10;Livres;439.94;352
+361;Guide Voyage 01;Livres;13.62;457
+362;Guide Voyage 02;Livres;79.84;398
+363;Guide Voyage 03;Livres;288.61;112
+364;Guide Voyage 04;Livres;125.25;411
+365;Guide Voyage 05;Livres;466.06;265
+366;Guide Voyage 06;Livres;314.43;25
+367;Guide Voyage 07;Livres;375.29;127
+368;Guide Voyage 08;Livres;89.52;233
+369;Guide Voyage 09;Livres;97.37;410
+370;Guide Voyage 10;Livres;314.49;341
+371;Bande Dessinee 01;Livres;358.07;286
+372;Bande Dessinee 02;Livres;400.22;162
+373;Bande Dessinee 03;Livres;300.03;313
+374;Bande Dessinee 04;Livres;481.37;456
+375;Bande Dessinee 05;Livres;340.80;218
+376;Bande Dessinee 06;Livres;369.04;228
+377;Bande Dessinee 07;Livres;114.29;380
+378;Bande Dessinee 08;Livres;321.07;230
+379;Bande Dessinee 09;Livres;179.85;384
+380;Bande Dessinee 10;Livres;172.02;430
+381;Livre Cuisine 01;Livres;427.88;141
+382;Livre Cuisine 02;Livres;351.62;248
+383;Livre Cuisine 03;Livres;420.73;122
+384;Livre Cuisine 04;Livres;189.95;225
+385;Livre Cuisine 05;Livres;60.76;365
+386;Livre Cuisine 06;Livres;197.24;120
+387;Livre Cuisine 07;Livres;188.06;171
+388;Livre Cuisine 08;Livres;219.51;457
+389;Livre Cuisine 09;Livres;363.98;41
+390;Livre Cuisine 10;Livres;100.67;77
+391;Essai Histoire 01;Livres;161.54;196
+392;Essai Histoire 02;Livres;464.77;78
+393;Essai Histoire 03;Livres;472.94;109
+394;Essai Histoire 04;Livres;52.08;212
+395;Essai Histoire 05;Livres;277.11;169
+396;Essai Histoire 06;Livres;365.59;238
+397;Essai Histoire 07;Livres;282.47;31
+398;Essai Histoire 08;Livres;145.54;426
+399;Essai Histoire 09;Livres;285.33;199
+400;Essai Histoire 10;Livres;392.77;484
+401;Tondeuse Electrique 01;Jardin;465.80;10
+402;Tondeuse Electrique 02;Jardin;387.27;194
+403;Tondeuse Electrique 03;Jardin;322.58;3
+404;Tondeuse Electrique 04;Jardin;240.51;152
+405;Tondeuse Electrique 05;Jardin;265.57;436
+406;Tondeuse Electrique 06;Jardin;284.59;275
+407;Tondeuse Electrique 07;Jardin;499.88;376
+408;Tondeuse Electrique 08;Jardin;367.90;409
+409;Tondeuse Electrique 09;Jardin;405.33;459
+410;Tondeuse Electrique 10;Jardin;154.52;249
+411;Salon de Jardin 01;Jardin;153.79;139
+412;Salon de Jardin 02;Jardin;295.61;248
+413;Salon de Jardin 03;Jardin;29.01;199
+414;Salon de Jardin 04;Jardin;230.27;342
+415;Salon de Jardin 05;Jardin;455.07;408
+416;Salon de Jardin 06;Jardin;274.96;370
+417;Salon de Jardin 07;Jardin;118.15;430
+418;Salon de Jardin 08;Jardin;316.29;470
+419;Salon de Jardin 09;Jardin;93.63;318
+420;Salon de Jardin 10;Jardin;360.03;13
+421;Barbecue Charbon 01;Jardin;268.21;303
+422;Barbecue Charbon 02;Jardin;379.86;339
+423;Barbecue Charbon 03;Jardin;27.75;42
+424;Barbecue Charbon 04;Jardin;431.22;219
+425;Barbecue Charbon 05;Jardin;98.92;443
+426;Barbecue Charbon 06;Jardin;312.56;93
+427;Barbecue Charbon 07;Jardin;42.94;133
+428;Barbecue Charbon 08;Jardin;258.43;167
+429;Barbecue Charbon 09;Jardin;148.70;232
+430;Barbecue Charbon 10;Jardin;224.19;172
+431;Arrosage Automatique 01;Jardin;258.45;142
+432;Arrosage Automatique 02;Jardin;286.26;129
+433;Arrosage Automatique 03;Jardin;63.66;240
+434;Arrosage Automatique 04;Jardin;22.69;383
+435;Arrosage Automatique 05;Jardin;363.50;26
+436;Arrosage Automatique 06;Jardin;239.34;114
+437;Arrosage Automatique 07;Jardin;436.06;35
+438;Arrosage Automatique 08;Jardin;437.12;20
+439;Arrosage Automatique 09;Jardin;30.32;486
+440;Arrosage Automatique 10;Jardin;172.04;102
+441;Eclairage Solaire 01;Jardin;23.34;318
+442;Eclairage Solaire 02;Jardin;109.85;122
+443;Eclairage Solaire 03;Jardin;92.71;242
+444;Eclairage Solaire 04;Jardin;448.72;58
+445;Eclairage Solaire 05;Jardin;379.59;485
+446;Eclairage Solaire 06;Jardin;152.83;238
+447;Eclairage Solaire 07;Jardin;468.39;131
+448;Eclairage Solaire 08;Jardin;251.74;85
+449;Eclairage Solaire 09;Jardin;407.06;310
+450;Eclairage Solaire 10;Jardin;480.77;58
+451;Perceuse Visseuse 01;Bricolage;117.31;493
+452;Perceuse Visseuse 02;Bricolage;213.83;55
+453;Perceuse Visseuse 03;Bricolage;389.23;13
+454;Perceuse Visseuse 04;Bricolage;214.43;294
+455;Perceuse Visseuse 05;Bricolage;453.89;464
+456;Perceuse Visseuse 06;Bricolage;255.95;203
+457;Perceuse Visseuse 07;Bricolage;478.58;101
+458;Perceuse Visseuse 08;Bricolage;59.79;303
+459;Perceuse Visseuse 09;Bricolage;462.59;425
+460;Perceuse Visseuse 10;Bricolage;421.05;124
+461;Scie Circulaire 01;Bricolage;76.77;356
+462;Scie Circulaire 02;Bricolage;207.63;435
+463;Scie Circulaire 03;Bricolage;458.42;307
+464;Scie Circulaire 04;Bricolage;89.32;407
+465;Scie Circulaire 05;Bricolage;380.87;400
+466;Scie Circulaire 06;Bricolage;36.90;177
+467;Scie Circulaire 07;Bricolage;359.12;219
+468;Scie Circulaire 08;Bricolage;443.52;189
+469;Scie Circulaire 09;Bricolage;55.18;259
+470;Scie Circulaire 10;Bricolage;434.36;174
+471;Coffret Douilles 01;Bricolage;18.28;434
+472;Coffret Douilles 02;Bricolage;285.27;421
+473;Coffret Douilles 03;Bricolage;331.24;54
+474;Coffret Douilles 04;Bricolage;294.10;491
+475;Coffret Douilles 05;Bricolage;247.35;325
+476;Coffret Douilles 06;Bricolage;311.28;362
+477;Coffret Douilles 07;Bricolage;110.25;222
+478;Coffret Douilles 08;Bricolage;125.42;375
+479;Coffret Douilles 09;Bricolage;351.92;494
+480;Coffret Douilles 10;Bricolage;436.27;138
+481;Niveau Laser 01;Bricolage;413.63;413
+482;Niveau Laser 02;Bricolage;362.68;396
+483;Niveau Laser 03;Bricolage;326.85;238
+484;Niveau Laser 04;Bricolage;295.44;422
+485;Niveau Laser 05;Bricolage;489.07;303
+486;Niveau Laser 06;Bricolage;185.88;165
+487;Niveau Laser 07;Bricolage;170.87;425
+488;Niveau Laser 08;Bricolage;66.78;142
+489;Niveau Laser 09;Bricolage;305.42;124
+490;Niveau Laser 10;Bricolage;314.54;291
+491;Ponceuse Vibrante 01;Bricolage;409.97;342
+492;Ponceuse Vibrante 02;Bricolage;258.36;172
+493;Ponceuse Vibrante 03;Bricolage;28.79;253
+494;Ponceuse Vibrante 04;Bricolage;222.99;93
+495;Ponceuse Vibrante 05;Bricolage;329.51;108
+496;Ponceuse Vibrante 06;Bricolage;242.52;408
+497;Ponceuse Vibrante 07;Bricolage;179.30;174
+498;Ponceuse Vibrante 08;Bricolage;193.26;450
+499;Ponceuse Vibrante 09;Bricolage;400.68;359
+500;Ponceuse Vibrante 10;Bricolage;191.04;284

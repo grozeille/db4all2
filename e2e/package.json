@@ -1,0 +1,19 @@
+{
+  "name": "db4all-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "type": "commonjs",
+  "description": "End-to-end tests for db4all (Playwright + Gherkin via playwright-bdd)",
+  "scripts": {
+    "test": "bddgen && playwright test",
+    "test:headed": "bddgen && playwright test --headed",
+    "bddgen": "bddgen",
+    "install-browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.0.0",
+    "playwright-bdd": "^9.2.1",
+    "typescript": "~5.8.0"
+  }
+}

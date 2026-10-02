@@ -93,6 +93,19 @@
                 "UI: npm dev"
             ],
             "problemMatcher": []
+        },
+        {
+            "label": "E2E: playwright test",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "test"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/e2e"
+            },
+            "group": "test",
+            "problemMatcher": []
         }
     ]
 }

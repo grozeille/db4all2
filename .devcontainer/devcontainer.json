@@ -46,8 +46,10 @@
                 "redhat.vscode-xml",
                 "dbaeumer.vscode-eslint",
                 "esbenp.prettier-vscode",
+                "CucumberOpen.cucumber-official",
                 "GitHub.copilot",
-                "GitHub.copilot-chat"
+                "GitHub.copilot-chat",
+                "holooooo.markdown-kanban"
             ],
             "settings": {
                 "java.configuration.updateBuildConfiguration": "interactive",
