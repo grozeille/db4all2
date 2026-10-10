@@ -1,15 +1,15 @@
 package fr.grozeille.db4all.api.steps;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import fr.grozeille.db4all.api.dto.AdminUpdatePasswordRequest;
 import fr.grozeille.db4all.api.dto.CreateUserRequest;
 import fr.grozeille.db4all.api.dto.DatasourceCreationRequest;
 import fr.grozeille.db4all.api.dto.LocalFilesystemDatasourceConfigurationDto;
 import fr.grozeille.db4all.api.dto.ProjectCreationRequest;
+import fr.grozeille.db4all.api.dto.ProjectDto;
 import fr.grozeille.db4all.api.dto.TableCreationRequest;
 import fr.grozeille.db4all.api.model.DatasourceType;
-import fr.grozeille.db4all.api.model.Project;
 import fr.grozeille.db4all.api.model.TableSourceKind;
 import fr.grozeille.db4all.api.model.User;
 import fr.grozeille.db4all.api.repository.UserRepository;
@@ -18,7 +18,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -134,7 +134,7 @@ public class UserFlowsStepDefinitions {
                 .content(objectMapper.writeValueAsString(request)));
         
         String response = lastResult.andReturn().getResponse().getContentAsString();
-        this.createdProjectId = objectMapper.readValue(response, Project.class).getId();
+        this.createdProjectId = objectMapper.readValue(response, ProjectDto.class).getId();
     }
 
     @Then("the project {string} is created successfully")

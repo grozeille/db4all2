@@ -1,7 +1,7 @@
 package fr.grozeille.db4all.api.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import fr.grozeille.db4all.api.dto.ConnectionTestResponse;
 import fr.grozeille.db4all.api.dto.DatasourceCreationRequest;
 import fr.grozeille.db4all.api.dto.DatasourceDto;
@@ -165,7 +165,7 @@ public class DatasourceService {
     private String writeConfiguration(LocalFilesystemDatasourceConfigurationDto configuration) {
         try {
             return objectMapper.writeValueAsString(configuration);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalArgumentException("Unable to serialize datasource configuration.", exception);
         }
     }
@@ -173,7 +173,7 @@ public class DatasourceService {
     private LocalFilesystemDatasourceConfigurationDto readConfiguration(String configurationJson) {
         try {
             return objectMapper.readValue(configurationJson, LocalFilesystemDatasourceConfigurationDto.class);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Unable to deserialize datasource configuration.", exception);
         }
     }

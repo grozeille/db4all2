@@ -30,6 +30,7 @@ api/target
 
 api-docs.json
 *.mv.db
+*.trace.db
 
 # Agent tools generated files
 .bin/

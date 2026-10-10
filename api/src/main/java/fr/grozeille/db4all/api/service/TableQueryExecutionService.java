@@ -1,8 +1,8 @@
 package fr.grozeille.db4all.api.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import fr.grozeille.db4all.api.dto.ColumnDefinitionDto;
 import fr.grozeille.db4all.api.dto.LocalFilesystemDatasourceConfigurationDto;
 import fr.grozeille.db4all.api.dto.TableQueryRequest;
@@ -161,7 +161,7 @@ public class TableQueryExecutionService {
     private JsonNode readTableConfiguration(String configurationJson) {
         try {
             return objectMapper.readTree(configurationJson);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Unable to deserialize table configuration.", exception);
         }
     }
