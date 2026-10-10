@@ -10,8 +10,9 @@ End-to-end tests: Gherkin features executed by the Playwright runner via
   (builds `ui/dist`, then the executable `api/target/db4all-api-*.jar`
   which serves both API and UI; the `release` profile is what embeds
   the UI statics into the jar)
-- Deps + browser (from `e2e/`):
-  `npm install && npm run install-browsers`
+- Deps + browser (from `e2e/`): `./setup-env.sh`
+  (npm deps, Playwright Chromium, OS libs, packaged jar;
+  falls back to user-space libs when sudo is unavailable)
 
 ## Commands (from `e2e/`)
 
