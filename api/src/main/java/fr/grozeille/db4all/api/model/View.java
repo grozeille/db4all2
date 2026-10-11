@@ -37,6 +37,13 @@ public class View {
     @Column(nullable = false, name = "source_table_id")
     private String sourceTableId;
 
+    @Column(name = "parent_view_id")
+    private String parentViewId;
+
+    @Lob
+    @Column(name = "steps_json")
+    private String stepsJson;
+
     @Lob
     @Column(nullable = false, name = "query_json")
     private String queryJson;

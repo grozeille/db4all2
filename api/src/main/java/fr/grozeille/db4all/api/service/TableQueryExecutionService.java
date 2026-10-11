@@ -80,19 +80,38 @@ public class TableQueryExecutionService {
         return execute(sourceTable, datasource, request, true);
     }
 
+    @Transactional(readOnly = true)
+    public TableQueryResponse queryChain(Table rootTable,
+                                         String projectId,
+                                         List<TableQueryRequest> chainQueries,
+                                         Authentication authentication) {
+        projectAccessService.checkCanAdministrateProject(projectId, authentication);
+        Datasource datasource = getDatasource(projectId, rootTable.getDatasourceId());
+        return executeChain(rootTable, datasource, chainQueries, true);
+    }
+
+    @Transactional(readOnly = true)
+    public String compileChain(Table rootTable,
+                               String projectId,
+                               List<TableQueryRequest> chainQueries,
+                               Authentication authentication) {
+        projectAccessService.checkCanAdministrateProject(projectId, authentication);
+        Datasource datasource = getDatasource(projectId, rootTable.getDatasourceId());
+        return planChain(rootTable, datasource, chainQueries, false).sql();
+    }
+
     private TableQueryResponse execute(Table table,
                                        Datasource datasource,
                                        TableQueryRequest request,
                                        boolean applyPagination) {
-        PreparedSource preparedSource = prepareSource(table, datasource);
-        List<TableQuerySqlCompiler.SchemaColumn> schema = inspectSchema(preparedSource);
-        TableQuerySqlCompiler.QueryPlan plan = tableQuerySqlCompiler.compile(
-                preparedSource.sourceSql(),
-                preparedSource.parameters(),
-                schema,
-                request,
-                applyPagination
-        );
+        return executeChain(table, datasource, List.of(request == null ? TableQueryRequest.builder().build() : request), applyPagination);
+    }
+
+    private TableQueryResponse executeChain(Table table,
+                                            Datasource datasource,
+                                            List<TableQueryRequest> chainQueries,
+                                            boolean applyPagination) {
+        TableQuerySqlCompiler.QueryPlan plan = planChain(table, datasource, chainQueries, applyPagination);
 
         try (Connection connection = DriverManager.getConnection(DUCKDB_JDBC_URL);
              PreparedStatement statement = connection.prepareStatement(plan.sql())) {
@@ -117,6 +136,37 @@ public class TableQueryExecutionService {
             log.error("DuckDB query execution failed for table {} in project {}", table.getId(), table.getProjectId(), exception);
             throw new IllegalStateException("Unable to execute the query.", exception);
         }
+    }
+
+    private TableQuerySqlCompiler.QueryPlan planChain(Table table,
+                                                       Datasource datasource,
+                                                       List<TableQueryRequest> chainQueries,
+                                                       boolean applyPagination) {
+        List<TableQueryRequest> effectiveChain = chainQueries == null || chainQueries.isEmpty()
+                ? List.of(TableQueryRequest.builder().build())
+                : chainQueries;
+        PreparedSource preparedSource = prepareSource(table, datasource);
+        String currentSql = preparedSource.sourceSql();
+        List<Object> currentParameters = new ArrayList<>(preparedSource.parameters());
+        List<TableQuerySqlCompiler.SchemaColumn> schema = inspectSchema(preparedSource);
+
+        TableQuerySqlCompiler.QueryPlan plan = null;
+        for (int index = 0; index < effectiveChain.size(); index++) {
+            boolean last = index == effectiveChain.size() - 1;
+            plan = tableQuerySqlCompiler.compile(
+                    currentSql,
+                    currentParameters,
+                    schema,
+                    effectiveChain.get(index),
+                    last && applyPagination
+            );
+            currentSql = plan.sql();
+            currentParameters = new ArrayList<>(plan.parameters());
+            if (!last) {
+                schema = inspectSchema(new PreparedSource(currentSql, currentParameters));
+            }
+        }
+        return plan;
     }
 
     private Datasource getDatasource(String projectId, String datasourceId) {

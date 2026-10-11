@@ -17,6 +17,8 @@ public interface ViewRepository extends JpaRepository<View, String> {
 
     Optional<View> findByIdAndProjectId(String id, String projectId);
 
+    boolean existsByParentViewId(String parentViewId);
+
     boolean existsByProjectIdAndNameIgnoreCase(String projectId, String name);
 
     boolean existsByProjectIdAndNameIgnoreCaseAndIdNot(String projectId, String name, String id);

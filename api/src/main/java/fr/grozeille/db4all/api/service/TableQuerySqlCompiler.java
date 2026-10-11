@@ -5,6 +5,7 @@ import fr.grozeille.db4all.api.dto.AggregationRequestDto;
 import fr.grozeille.db4all.api.dto.FilterConditionDto;
 import fr.grozeille.db4all.api.dto.FilterGroupDto;
 import fr.grozeille.db4all.api.dto.SelectedColumnDto;
+import fr.grozeille.db4all.api.dto.SortDto;
 import fr.grozeille.db4all.api.dto.TableQueryRequest;
 import fr.grozeille.db4all.api.exceptions.InvalidQueryException;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,11 @@ public class TableQuerySqlCompiler {
                     .map(column -> quoteIdentifier(resolveColumn(column, schemaByName).name()))
                     .reduce((left, right) -> left + ", " + right)
                     .orElseThrow());
+        }
+
+        String orderByClause = compileOrderByClause(effectiveRequest.getSorts(), schemaByName, projectedColumns);
+        if (StringUtils.hasText(orderByClause)) {
+            sql.append(" ORDER BY ").append(orderByClause);
         }
 
         if (applyPagination) {
@@ -145,6 +151,40 @@ public class TableQuerySqlCompiler {
         }
         sql.append(String.join(", ", fragments));
         return projectedColumns;
+    }
+
+    private String compileOrderByClause(List<SortDto> sorts,
+                                         Map<String, SchemaColumn> schemaByName,
+                                         List<String> projectedColumns) {
+        if (CollectionUtils.isEmpty(sorts)) {
+            return null;
+        }
+        List<String> parts = new ArrayList<>();
+        for (SortDto sort : sorts) {
+            String direction = normalizeRequired(sort == null ? null : sort.getDirection(), "Sort direction is required.")
+                    .toUpperCase(Locale.ROOT);
+            if (!"ASC".equals(direction) && !"DESC".equals(direction)) {
+                throw new InvalidQueryException("Unsupported sort direction: " + direction);
+            }
+            String requestedColumn = sort == null ? null : sort.getColumn();
+            String resolved = resolveSortColumn(requestedColumn, schemaByName, projectedColumns);
+            parts.add(quoteIdentifier(resolved) + " " + direction);
+        }
+        return String.join(", ", parts);
+    }
+
+    private String resolveSortColumn(String requestedColumn,
+                                     Map<String, SchemaColumn> schemaByName,
+                                     List<String> projectedColumns) {
+        String normalized = normalizeRequired(requestedColumn, "Column name is required.");
+        if (projectedColumns != null) {
+            for (String projected : projectedColumns) {
+                if (projected.equalsIgnoreCase(normalized)) {
+                    return projected;
+                }
+            }
+        }
+        return resolveColumn(normalized, schemaByName).name();
     }
 
     private String compileWhereClause(List<FilterGroupDto> groups,

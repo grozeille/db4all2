@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,5 +18,7 @@ public class ViewDto {
     private String description;
     private ViewType type;
     private String sourceTableId;
+    private String parentViewId;
     private TableQueryRequest query;
+    private List<ViewTransformationStepDto> steps;
 }

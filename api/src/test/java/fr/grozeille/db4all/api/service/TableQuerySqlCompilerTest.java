@@ -5,6 +5,7 @@ import fr.grozeille.db4all.api.dto.AggregationRequestDto;
 import fr.grozeille.db4all.api.dto.FilterConditionDto;
 import fr.grozeille.db4all.api.dto.FilterGroupDto;
 import fr.grozeille.db4all.api.dto.SelectedColumnDto;
+import fr.grozeille.db4all.api.dto.SortDto;
 import fr.grozeille.db4all.api.dto.TableQueryRequest;
 import fr.grozeille.db4all.api.exceptions.InvalidQueryException;
 import org.junit.jupiter.api.Test;
@@ -129,6 +130,76 @@ class TableQuerySqlCompilerTest {
                 .selectedColumns(List.of(SelectedColumnDto.builder()
                         .column("customerName\"; DROP TABLE views; --")
                         .build()))
+                .build();
+
+        assertThrows(InvalidQueryException.class, () -> compiler.compile(
+                "SELECT * FROM source_table",
+                List.of(),
+                schema(),
+                request,
+                false
+        ));
+    }
+
+    @Test
+    void shouldCompileOrderByClause() {
+        TableQueryRequest request = TableQueryRequest.builder()
+                .sorts(List.of(
+                        SortDto.builder().column("country").direction("ASC").build(),
+                        SortDto.builder().column("amount").direction("desc").build()))
+                .build();
+
+        TableQuerySqlCompiler.QueryPlan plan = compiler.compile(
+                "SELECT * FROM source_table",
+                List.of(),
+                schema(),
+                request,
+                true
+        );
+
+        assertTrue(plan.sql().contains("ORDER BY \"country\" ASC, \"amount\" DESC"));
+    }
+
+    @Test
+    void shouldResolveSortOnAliasedColumn() {
+        TableQueryRequest request = TableQueryRequest.builder()
+                .selectedColumns(List.of(SelectedColumnDto.builder()
+                        .column("customerName")
+                        .alias("customer_name")
+                        .build()))
+                .sorts(List.of(SortDto.builder().column("customer_name").direction("ASC").build()))
+                .build();
+
+        TableQuerySqlCompiler.QueryPlan plan = compiler.compile(
+                "SELECT * FROM source_table",
+                List.of(),
+                schema(),
+                request,
+                false
+        );
+
+        assertTrue(plan.sql().contains("ORDER BY \"customer_name\" ASC"));
+    }
+
+    @Test
+    void shouldRejectInvalidSortDirection() {
+        TableQueryRequest request = TableQueryRequest.builder()
+                .sorts(List.of(SortDto.builder().column("country").direction("SIDEWAYS").build()))
+                .build();
+
+        assertThrows(InvalidQueryException.class, () -> compiler.compile(
+                "SELECT * FROM source_table",
+                List.of(),
+                schema(),
+                request,
+                false
+        ));
+    }
+
+    @Test
+    void shouldRejectSortOnUnknownColumn() {
+        TableQueryRequest request = TableQueryRequest.builder()
+                .sorts(List.of(SortDto.builder().column("unknown_column").direction("ASC").build()))
                 .build();
 
         assertThrows(InvalidQueryException.class, () -> compiler.compile(

@@ -5,6 +5,7 @@ import fr.grozeille.db4all.api.dto.TableQueryRequest;
 import fr.grozeille.db4all.api.dto.TableQueryResponse;
 import fr.grozeille.db4all.api.dto.ViewCreationRequest;
 import fr.grozeille.db4all.api.dto.ViewDto;
+import fr.grozeille.db4all.api.dto.ViewPreviewRequest;
 import fr.grozeille.db4all.api.dto.ViewUpdateRequest;
 import fr.grozeille.db4all.api.service.ViewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -123,6 +124,23 @@ public class ViewController {
                                        Authentication authentication) {
         viewService.delete(projectId, viewId, authentication);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Preview a view draft", description = "Executes an unsaved query against a table or a parent view. Used to preview transformation steps while editing.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Preview executed successfully.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TableQueryResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized.", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "View or table not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "422", description = "Semantically invalid query.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/preview")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TableQueryResponse> preview(@PathVariable String projectId,
+                                                     @RequestBody ViewPreviewRequest request,
+                                                     Authentication authentication) {
+        return ResponseEntity.ok(viewService.preview(projectId, request, authentication));
     }
 
     @Operation(summary = "Query a view", description = "Executes the saved logical view definition.")

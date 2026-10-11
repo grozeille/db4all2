@@ -16,6 +16,7 @@ public class TableQueryRequest {
     private Boolean distinct;
     private List<FilterGroupDto> filters;
     private AggregationRequestDto aggregations;
+    private List<SortDto> sorts;
     private Integer page;
     private Integer size;
 }
