@@ -1,6 +1,6 @@
 package fr.grozeille.db4all.api.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import fr.grozeille.db4all.api.model.TableSourceKind;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

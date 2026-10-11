@@ -5,13 +5,14 @@ End-to-end tests: Gherkin features executed by the Playwright runner via
 
 ## Prerequisites
 
-- Java 21, Node 22
+- Java 25, Node 22
 - Packaged app: `mvn -DskipTests package -P release` from the repo root
   (builds `ui/dist`, then the executable `api/target/db4all-api-*.jar`
   which serves both API and UI; the `release` profile is what embeds
   the UI statics into the jar)
-- Deps + browser (from `e2e/`):
-  `npm install && npm run install-browsers`
+- Deps + browser (from `e2e/`): `./setup-env.sh`
+  (npm deps, Playwright Chromium, OS libs, packaged jar;
+  falls back to user-space libs when sudo is unavailable)
 
 ## Commands (from `e2e/`)
 
@@ -20,6 +21,13 @@ End-to-end tests: Gherkin features executed by the Playwright runner via
 - `npx playwright test --grep "Filter"` — run selected scenarios
   (each scenario sets up its own prerequisites, except scenario 1
   which needs a fresh database)
+
+## Screenshots
+
+An `AfterStep` hook (`steps/hooks.ts`) captures a full-page screenshot
+after every step. Files land in `test-results/<scenario>/step-NN-<step>.png`
+and are also attached in the HTML report
+(`npx playwright show-report` from `e2e/`).
 
 ## How it works
 

@@ -1,7 +1,7 @@
 package fr.grozeille.db4all.api.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import fr.grozeille.db4all.api.dto.TableQueryRequest;
 import fr.grozeille.db4all.api.dto.TableQueryResponse;
 import fr.grozeille.db4all.api.dto.ViewCreationRequest;
@@ -172,7 +172,7 @@ public class ViewService {
     private String writeQuery(TableQueryRequest query) {
         try {
             return objectMapper.writeValueAsString(query);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalArgumentException("Unable to serialize the view query.", exception);
         }
     }
@@ -180,7 +180,7 @@ public class ViewService {
     private TableQueryRequest readQuery(String queryJson) {
         try {
             return objectMapper.readValue(queryJson, TableQueryRequest.class);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Unable to deserialize the view query.", exception);
         }
     }
