@@ -1,4 +1,5 @@
 import * as path from 'node:path';
+import type { Page } from '@playwright/test';
 import { Given, When, Then, expect } from './fixtures';
 import { SAMPLES_DIR, countCsvWhere, csvColumnIndex, ensureCsvTable, snap, world } from './support';
 
@@ -27,22 +28,36 @@ Then('the table shows data with the {string} column', async ({ page }, column: s
   await snap(page, 'table-content');
 });
 
+async function applyFirstCondition(page: Page, column: string, value: string): Promise<void> {
+  const addCondition = page.getByRole('button', { name: '+ Condition' });
+  if (!(await addCondition.isVisible())) {
+    await page.locator('summary').click();
+  }
+  await addCondition.click();
+  // First select is the AND/OR group operator, second is the field.
+  await page.locator('.query-group select').nth(1).selectOption(column);
+  await page.locator('.query-group input').fill(value);
+  await page.getByRole('button', { name: 'Apply', exact: true }).click();
+}
+
 When('I filter where {string} equals {string}', async ({ page }, column: string, value: string) => {
   if (!world.projectId || !world.tableId) {
     throw new Error('No table in world: create the table first.');
   }
   await page.goto(`/projects/${world.projectId}/tables/${world.tableId}/content`);
   await expect(page.locator(gridRows).first()).toBeVisible();
-
-  await page.locator('summary').click();
-  await page.getByRole('button', { name: '+ Condition' }).click();
-  // First select is the AND/OR group operator, second is the field.
-  await page.locator('.query-group select').nth(1).selectOption(column);
-  await page.locator('.query-group input').fill(value);
-  await page.getByRole('button', { name: 'Apply filters' }).click();
+  await applyFirstCondition(page, column, value);
 
   const expected = countCsvWhere(path.join(SAMPLES_DIR, 'clients.csv'), column, value);
   await expect(page.locator(gridRows)).toHaveCount(expected);
+  await expect(page.locator('.list-group-item', { hasText: 'Filter' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Update filter', exact: true })).toBeVisible();
+});
+
+When('I add a filter where {string} equals {string}', async ({ page }, column: string, value: string) => {
+  await applyFirstCondition(page, column, value);
+  await expect(page.locator('.list-group-item', { hasText: 'Filter' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Update filter', exact: true })).toBeVisible();
 });
 
 Then('every visible row has city {string}', async ({ page }, city: string) => {

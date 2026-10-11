@@ -37,8 +37,33 @@ export type TableQueryFilterGroup = {
   groups?: TableQueryFilterGroup[];
 };
 
+export type TableQuerySelectedColumn = {
+  column: string;
+  alias?: string;
+};
+
+export type TableQuerySort = {
+  column: string;
+  direction: 'ASC' | 'DESC';
+};
+
+export type TableQueryAggregationFunction = {
+  column: string;
+  function: string;
+  alias?: string;
+};
+
+export type TableQueryAggregations = {
+  groupedBy?: string[];
+  functions?: TableQueryAggregationFunction[];
+};
+
 export type TableQueryRequest = {
+  selectedColumns?: TableQuerySelectedColumn[];
+  distinct?: boolean;
   filters?: TableQueryFilterGroup[];
+  aggregations?: TableQueryAggregations;
+  sorts?: TableQuerySort[];
   page?: number;
   size?: number;
 };

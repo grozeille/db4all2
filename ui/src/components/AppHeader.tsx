@@ -3,6 +3,7 @@ import { useLocation, useMatch } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getProject } from '../services/projectApi';
 import { getTable } from '../services/tableApi';
+import { getView } from '../services/viewApi';
 import { userApi } from "../services/userApi.ts";
 import type { User } from "../types/auth.ts";
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
@@ -26,18 +27,23 @@ export function AppHeader({ onLogout }: { onLogout: () => void }) {
   const tableNewMatch = useMatch('/projects/:projectId/tables/new');
   const tableContentMatch = useMatch('/projects/:projectId/tables/:tableId/content');
   const tableSettingsMatch = useMatch('/projects/:projectId/tables/:tableId/settings');
+  const viewContentMatch = useMatch('/projects/:projectId/views/:viewId/content');
   const routeProjectId = projectSettingsMatch?.params.projectId
     || projectTablesMatch?.params.projectId
     || tableNewMatch?.params.projectId
     || tableContentMatch?.params.projectId
     || tableSettingsMatch?.params.projectId
+    || viewContentMatch?.params.projectId
     || null;
   const routeTableId = tableContentMatch?.params.tableId
     || tableSettingsMatch?.params.tableId
     || null;
-  const navigationState = location.state as { projectName?: string; tableName?: string } | null;
+  const routeViewId = viewContentMatch?.params.viewId
+    || null;
+  const navigationState = location.state as { projectName?: string; tableName?: string; viewName?: string } | null;
   const [projectName, setProjectName] = useState<string | null>(null);
   const [tableName, setTableName] = useState<string | null>(null);
+  const [viewName, setViewName] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -66,7 +72,17 @@ export function AppHeader({ onLogout }: { onLogout: () => void }) {
     } else {
       setTableName(null);
     }
-  }, [navigationState?.projectName, navigationState?.tableName, routeProjectId, routeTableId]);
+
+    if (navigationState?.viewName) {
+      setViewName(navigationState.viewName);
+    }
+
+    if (routeProjectId && routeViewId) {
+      getView(routeProjectId, routeViewId).then(v => setViewName(v.name)).catch(() => setViewName(navigationState?.viewName ?? null));
+    } else {
+      setViewName(null);
+    }
+  }, [navigationState?.projectName, navigationState?.tableName, navigationState?.viewName, routeProjectId, routeTableId, routeViewId]);
 
   function getBreadcrumbs() {
     const crumbs = [
@@ -91,18 +107,24 @@ export function AppHeader({ onLogout }: { onLogout: () => void }) {
     }
 
     if (projectTablesMatch) {
-      crumbs.push({ name: 'Tables', href: location.pathname });
+      crumbs.push({ name: 'Tables & views', href: location.pathname });
       return crumbs;
     }
 
     if (tableNewMatch) {
-      crumbs.push({ name: 'Tables', href: `/projects/${routeProjectId}/tables` });
+      crumbs.push({ name: 'Tables & views', href: `/projects/${routeProjectId}/tables` });
       crumbs.push({ name: 'New table', href: location.pathname });
       return crumbs;
     }
 
+    if (routeProjectId && routeViewId) {
+      crumbs.push({ name: 'Tables & views', href: `/projects/${routeProjectId}/tables` });
+      crumbs.push({ name: viewName || routeViewId, href: location.pathname });
+      return crumbs;
+    }
+
     if (routeProjectId && routeTableId) {
-      crumbs.push({ name: 'Tables', href: `/projects/${routeProjectId}/tables` });
+      crumbs.push({ name: 'Tables & views', href: `/projects/${routeProjectId}/tables` });
       crumbs.push({ name: tableName || routeTableId, href: `/projects/${routeProjectId}/tables/${routeTableId}/content` });
     }
 

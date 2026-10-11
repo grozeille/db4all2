@@ -12,7 +12,7 @@ export async function snap(page: Page, name: string): Promise<void> {
 export const SAMPLES_DIR = path.resolve(__dirname, '..', '..', 'sample');
 
 /** Scenario-scoped ids, filled by the `exists` steps below. */
-export const world: { projectId?: string; tableId?: string } = {};
+export const world: { projectId?: string; tableId?: string; viewId?: string } = {};
 
 export function projectIdFromUrl(page: Page): string {
   const match = page.url().match(/\/projects\/([^/]+)/);
@@ -24,6 +24,27 @@ export function tableIdFromUrl(page: Page): string {
   const match = page.url().match(/\/tables\/([^/]+)/);
   if (!match) throw new Error(`No table id in URL: ${page.url()}`);
   return match[1];
+}
+
+export function viewIdFromUrl(page: Page): string {
+  const match = page.url().match(/\/views\/([^/]+)/);
+  if (!match) throw new Error(`No view id in URL: ${page.url()}`);
+  return match[1];
+}
+
+/** Card of the unified tables/views list, qualified by its kind badge. */
+export function listCard(page: Page, name: string, badge: 'Table' | 'View') {
+  return page
+    .locator('.card', { has: page.locator('.card-title', { hasText: name }) })
+    .filter({ has: page.locator('.badge', { hasText: badge }) });
+}
+
+/** Opens the unified tables/views list and waits until results render. */
+export async function gotoTablesList(page: Page, projectId: string): Promise<void> {
+  await page.goto(`/projects/${projectId}/tables`);
+  await expect(page.getByRole('heading', { name: /Tables and views of project/ })).toBeVisible();
+  // The spinner unmounts in the same render pass as the results: hidden means settled.
+  await page.locator('.spinner-border').waitFor({ state: 'hidden', timeout: 30_000 });
 }
 
 export async function loginAs(page: Page, email: string, password: string): Promise<void> {
@@ -38,9 +59,17 @@ export async function loginAs(page: Page, email: string, password: string): Prom
 export async function ensureProject(page: Page, name: string): Promise<string> {
   await page.goto('/projects');
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
-  const card = page.locator('.card-title', { hasText: name });
-  if ((await card.count()) > 0) {
-    await card.first().click();
+  // No loading marker on this page: click with a timeout instead of an
+  // instantaneous count(), which would race the list fetch.
+  const opened = await page
+    .locator('.card-title', { hasText: name })
+    .first()
+    .click({ timeout: 10_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (opened) {
     await page.waitForURL(/\/projects\/[^/]+\/tables/);
     return projectIdFromUrl(page);
   }
@@ -62,7 +91,14 @@ export async function ensureDatasource(
   await page.goto(`/projects/${projectId}/settings`);
   await expect(page.getByRole('heading', { name: /Project settings/ })).toBeVisible();
   const row = page.locator('tbody tr').filter({ hasText: name }).filter({ hasText: rootPath });
-  if ((await row.count()) > 0) return;
+  // Rows load separately from the heading: wait instead of counting instantly.
+  const found = await expect(row)
+    .toBeVisible({ timeout: 10_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (found) return;
 
   await page.getByRole('button', { name: 'Add datasource' }).click();
   const modal = page.locator('.modal-content');
@@ -84,10 +120,18 @@ export async function ensureCsvTable(
   csvFile: string,
   datasourceName: string,
 ): Promise<string> {
-  await page.goto(`/projects/${projectId}/tables`);
-  await expect(page.getByRole('heading', { name: /Tables of project/ })).toBeVisible();
-  const card = page.locator('.card-title', { hasText: name });
-  if ((await card.count()) > 0) {
+  await gotoTablesList(page, projectId);
+  // Narrow by name first: the card may sit on another page.
+  await page.getByPlaceholder('Search a table or a view...').fill(name);
+  const card = listCard(page, name, 'Table');
+  const found = await card
+    .first()
+    .waitFor({ state: 'visible', timeout: 10_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (found) {
     await card.first().click();
     await page.waitForURL(/\/tables\/[^/]+\/content/);
     return tableIdFromUrl(page);
@@ -102,6 +146,82 @@ export async function ensureCsvTable(
   await page.getByRole('button', { name: 'Save' }).click();
   await page.waitForURL(/\/tables\/[^/]+\/content/);
   return tableIdFromUrl(page);
+}
+
+/** Returns the view id, saving the table content as a view through the UI if missing. */
+export async function ensureView(page: Page, projectId: string, tableId: string, name: string): Promise<string> {
+  await gotoTablesList(page, projectId);
+  // Narrow by name first: the card may sit on another page.
+  await page.getByPlaceholder('Search a table or a view...').fill(name);
+  const card = listCard(page, name, 'View');
+  const found = await card
+    .first()
+    .waitFor({ state: 'visible', timeout: 10_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (found) {
+    await card.first().click();
+    await page.waitForURL(/\/views\/[^/]+\/content/);
+    return viewIdFromUrl(page);
+  }
+
+  await page.goto(`/projects/${projectId}/tables/${tableId}/content`);
+  await expect(page.locator('.ag-center-cols-container .ag-row').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Save as view' }).click();
+  const modal = page.locator('.modal-content');
+  await modal.locator('.modal-body input.form-control').first().fill(name);
+  await modal.getByRole('button', { name: 'Save view' }).click();
+  // Saving redirects straight to the view editor.
+  await page.waitForURL(/\/views\/[^/]+\/content/);
+  return viewIdFromUrl(page);
+}
+
+/**
+ * Ensures `count` pagination fixture tables (`extra-01`, ...) exist, creating
+ * the missing ones through the API: fast seeding for scenarios that need a
+ * second list page. Requires a logged-in page (token read from localStorage).
+ */
+export async function ensureExtraTables(page: Page, projectId: string, count: number): Promise<void> {
+  const token = await page.evaluate(() => window.localStorage.getItem('token'));
+  if (!token) throw new Error('No auth token: log in first.');
+  const origin = new URL(page.url()).origin;
+  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  const tablesRes = await page.request.get(`${origin}/api/v2/projects/${projectId}/tables?size=100`, { headers });
+  if (!tablesRes.ok()) throw new Error(`Unable to list tables: ${tablesRes.status()}`);
+  const existing = new Set<string>(
+    ((await tablesRes.json()) as { content: { name: string }[] }).content.map((table) => table.name),
+  );
+
+  const wanted: string[] = [];
+  for (let i = 1; i <= count; i++) {
+    const name = `extra-${String(i).padStart(2, '0')}`;
+    if (!existing.has(name)) wanted.push(name);
+  }
+  if (wanted.length === 0) return;
+
+  const datasourcesRes = await page.request.get(`${origin}/api/v2/projects/${projectId}/datasources`, { headers });
+  if (!datasourcesRes.ok()) throw new Error(`Unable to list datasources: ${datasourcesRes.status()}`);
+  const datasource = ((await datasourcesRes.json()) as { id: string; name: string }[]).find(
+    (candidate) => candidate.name === 'sample-data',
+  );
+  if (!datasource) throw new Error('Datasource "sample-data" not found.');
+
+  for (const name of wanted) {
+    const created = await page.request.post(`${origin}/api/v2/projects/${projectId}/tables`, {
+      headers,
+      data: {
+        name,
+        description: 'e2e pagination fixture',
+        datasourceId: datasource.id,
+        sourceKind: 'CSV',
+        configuration: { path: 'clients.csv' },
+      },
+    });
+    if (!created.ok()) throw new Error(`Unable to create table ${name}: ${created.status()}`);
+  }
 }
 
 /** Counts `;`-separated CSV rows where `column` equals `value` (header excluded). */

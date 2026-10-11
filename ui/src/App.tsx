@@ -7,6 +7,7 @@ import ProjectSettingsPage from './pages/ProjectSettingsPage';
 import TableListPage from './pages/TableListPage';
 import TableContentPage from './pages/TableContentPage';
 import TableEditPage from './pages/TableEditPage';
+import ViewContentPage from './pages/ViewContentPage';
 import LoginPage from './pages/LoginPage';
 import SetupPage from './pages/SetupPage'; // Import the new setup page
 import { ProfilePage } from "./pages/ProfilePage.tsx";
@@ -58,6 +59,7 @@ const ProtectedRoutes = () => {
                     <Route path="/projects/:projectId/tables/new" element={<TableEditPage />} />
                     <Route path="/projects/:projectId/tables/:tableId/content" element={<TableContentPage />} />
                     <Route path="/projects/:projectId/tables/:tableId/settings" element={<TableEditPage />} />
+                    <Route path="/projects/:projectId/views/:viewId/content" element={<ViewContentPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/error/:code" element={<ErrorRoute />} />
