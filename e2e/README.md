@@ -29,6 +29,14 @@ after every step. Files land in `test-results/<scenario>/step-NN-<step>.png`
 and are also attached in the HTML report
 (`npx playwright show-report` from `e2e/`).
 
+## Continuous integration
+
+On every pull request, the `e2e` GitHub Actions workflow (`.github/workflows/e2e.yml`)
+packages the app, runs the full suite on a GitHub-hosted runner, and uploads
+the `playwright-report` artifact (HTML report with embedded screenshots plus
+the raw `test-results/` folder). Open the workflow run from the PR checks tab
+and download the artifact to browse the report locally.
+
 ## How it works
 
 - `playwright.config.ts` starts the packaged jar on port **18080** with a

@@ -3,9 +3,12 @@ import * as path from 'node:path';
 import { test as pwTest, type Page } from '@playwright/test';
 import { expect } from './fixtures';
 
-/** Screenshot attached to the test output (visible in the HTML report). */
+/** Screenshot saved to the test output and attached to the HTML report. */
 export async function snap(page: Page, name: string): Promise<void> {
-  await page.screenshot({ path: pwTest.info().outputPath(`${name}.png`), fullPage: true });
+  const fileName = `${name}.png`;
+  const filePath = pwTest.info().outputPath(fileName);
+  await page.screenshot({ path: filePath, fullPage: true });
+  await pwTest.info().attach(fileName, { path: filePath, contentType: 'image/png' });
 }
 
 /** Absolute path of the repo `sample/` folder, used as datasource root. */
