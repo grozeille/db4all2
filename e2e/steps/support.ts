@@ -183,6 +183,8 @@ export async function ensureJsonTable(
   if (jsonPath) {
     await page.getByPlaceholder('$.orders').fill(jsonPath);
   }
+  // Capture the filled JSON configuration form before saving.
+  await snap(page, 'table-new-json-form');
   await page.getByRole('button', { name: 'Save' }).click();
   await page.waitForURL(/\/tables\/[^/]+\/content/);
   return tableIdFromUrl(page);
