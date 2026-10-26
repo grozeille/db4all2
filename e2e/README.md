@@ -33,9 +33,11 @@ and are also attached in the HTML report
 
 On every pull request, the `e2e` GitHub Actions workflow (`.github/workflows/e2e.yml`)
 packages the app, runs the full suite on a GitHub-hosted runner, and uploads
-the `playwright-report` artifact (HTML report with embedded screenshots plus
-the raw `test-results/` folder). Open the workflow run from the PR checks tab
-and download the artifact to browse the report locally.
+the `playwright-report` artifact (self-contained HTML report: every screenshot
+is embedded, content-hash deduped). Open the workflow run from the PR checks
+tab, download the artifact, then serve it over HTTP to browse it, e.g.
+`npx playwright show-report <unzipped-dir>` — opening `index.html` directly
+via `file://` will not load the images.
 
 ## How it works
 

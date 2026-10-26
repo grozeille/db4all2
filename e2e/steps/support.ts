@@ -5,6 +5,7 @@ import { expect } from './fixtures';
 
 /** Screenshot saved to the test output and attached to the HTML report. */
 export async function snap(page: Page, name: string): Promise<void> {
+  // PNG on purpose: our flat-UI screenshots compress ~2x better as PNG than JPEG q80.
   const fileName = `${name}.png`;
   const filePath = pwTest.info().outputPath(fileName);
   await page.screenshot({ path: filePath, fullPage: true });
