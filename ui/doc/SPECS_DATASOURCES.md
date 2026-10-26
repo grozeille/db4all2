@@ -163,8 +163,9 @@ The user does not query a datasource directly. The user creates tables from data
 Supported physical table source kinds:
 - CSV file or file pattern
 - Parquet files
+- JSON file, optionally with a JSON path pointing to an array of objects
 
-For the MVP, only CSV and Parquet mapped from a Local filesystem datasource are in scope.
+For the MVP, only CSV, Parquet and JSON mapped from a Local filesystem datasource are in scope.
 
 Excel workbook support and PostgreSQL table support remain future work.
 
@@ -185,6 +186,20 @@ Optional fields:
 - encoding
 - first row as header
 - null value handling
+
+### JSON table
+
+Required fields:
+- table name
+- datasource
+- path or file pattern
+
+Optional fields:
+- JSON path of the object array (ex: `$.data.items`)
+
+When the JSON path is empty, the file itself must be an array of objects (or newline-delimited JSON).
+Otherwise the path designates the nested array to expose as rows, using dot-separated object field names
+with an optional leading `$` (ex: `$.orders`, `data.rows`, `$["my field"]`).
 
 ### Excel table
 

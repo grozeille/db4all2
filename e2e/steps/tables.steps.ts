@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import type { Page } from '@playwright/test';
 import { Given, When, Then, expect } from './fixtures';
-import { SAMPLES_DIR, countCsvWhere, csvColumnIndex, ensureCsvTable, snap, world } from './support';
+import { SAMPLES_DIR, countCsvWhere, csvColumnIndex, ensureCsvTable, ensureJsonTable, snap, world } from './support';
 
 const gridRows = '.ag-center-cols-container .ag-row';
 
@@ -26,6 +26,49 @@ Then('the table shows data with the {string} column', async ({ page }, column: s
   await expect(page.locator('.ag-cell', { hasText: '@example.fr' }).first()).toBeVisible();
   expect(await page.locator(gridRows).count()).toBeGreaterThan(0);
   await snap(page, 'table-content');
+});
+
+Given(
+  'the JSON table {string} exists from {string} with path {string} in datasource {string}',
+  async ({ page }, name: string, jsonFile: string, jsonPath: string, datasourceName: string) => {
+    if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
+    world.tableId = await ensureJsonTable(page, world.projectId, name, jsonFile, jsonPath, datasourceName);
+  },
+);
+
+Given(
+  'the JSON table {string} exists from {string} in datasource {string}',
+  async ({ page }, name: string, jsonFile: string, datasourceName: string) => {
+    if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
+    world.tableId = await ensureJsonTable(page, world.projectId, name, jsonFile, '', datasourceName);
+  },
+);
+
+When(
+  'I create a JSON table named {string} from {string} with path {string} in datasource {string}',
+  async ({ page }, name: string, jsonFile: string, jsonPath: string, datasourceName: string) => {
+    if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
+    world.tableId = await ensureJsonTable(page, world.projectId, name, jsonFile, jsonPath, datasourceName);
+  },
+);
+
+When(
+  'I create a JSON table named {string} from {string} in datasource {string}',
+  async ({ page }, name: string, jsonFile: string, datasourceName: string) => {
+    if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
+    world.tableId = await ensureJsonTable(page, world.projectId, name, jsonFile, '', datasourceName);
+  },
+);
+
+Then('the table shows the {string} column with {int} rows', async ({ page }, column: string, count: number) => {
+  await expect(page.locator('.ag-header-cell-text', { hasText: column }).first()).toBeVisible();
+  await expect(page.locator(gridRows)).toHaveCount(count);
+  await snap(page, 'table-content');
+});
+
+Then('the grid shows {int} rows', async ({ page }, count: number) => {
+  await expect(page.locator(gridRows)).toHaveCount(count);
+  await snap(page, 'table-filtered');
 });
 
 async function applyFirstCondition(page: Page, column: string, value: string): Promise<void> {

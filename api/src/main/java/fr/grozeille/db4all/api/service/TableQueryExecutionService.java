@@ -188,6 +188,7 @@ public class TableQueryExecutionService {
         String sourceSql = switch (table.getSourceKind()) {
             case CSV -> "SELECT * FROM read_csv_auto(?)";
             case PARQUET -> "SELECT * FROM read_parquet(?)";
+            case JSON -> TableJsonSource.buildSourceSql(configuration.path("jsonPath").asText(null));
         };
         return new PreparedSource(sourceSql, List.of(resolvedPath));
     }

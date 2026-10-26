@@ -126,8 +126,11 @@ public class TableService {
         if (!StringUtils.hasText(path)) {
             throw new IllegalArgumentException("Table configuration path is required.");
         }
-        if (!"CSV".equals(sourceKind) && !"PARQUET".equals(sourceKind)) {
-            throw new IllegalArgumentException("Only CSV and PARQUET tables are supported in the current MVP.");
+        if (!"CSV".equals(sourceKind) && !"PARQUET".equals(sourceKind) && !"JSON".equals(sourceKind)) {
+            throw new IllegalArgumentException("Only CSV, PARQUET and JSON tables are supported in the current MVP.");
+        }
+        if ("JSON".equals(sourceKind)) {
+            TableJsonSource.parseJsonPath(configuration.path("jsonPath").asText(null));
         }
     }
 

@@ -148,6 +148,46 @@ export async function ensureCsvTable(
   return tableIdFromUrl(page);
 }
 
+/** Returns the table id, creating the JSON table through the UI if missing. */
+export async function ensureJsonTable(
+  page: Page,
+  projectId: string,
+  name: string,
+  jsonFile: string,
+  jsonPath: string,
+  datasourceName: string,
+): Promise<string> {
+  await gotoTablesList(page, projectId);
+  // Narrow by name first: the card may sit on another page.
+  await page.getByPlaceholder('Search a table or a view...').fill(name);
+  const card = listCard(page, name, 'Table');
+  const found = await card
+    .first()
+    .waitFor({ state: 'visible', timeout: 10_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (found) {
+    await card.first().click();
+    await page.waitForURL(/\/tables\/[^/]+\/content/);
+    return tableIdFromUrl(page);
+  }
+
+  await page.goto(`/projects/${projectId}/tables/new`);
+  // Form labels have no associated <label for>, locate fields by order/type.
+  await page.locator('form select').nth(0).selectOption({ label: 'JSON file' });
+  await page.locator('form input').nth(0).fill(name);
+  await page.locator('form select').nth(1).selectOption({ label: datasourceName });
+  await page.getByPlaceholder('data/orders.json').fill(jsonFile);
+  if (jsonPath) {
+    await page.getByPlaceholder('$.orders').fill(jsonPath);
+  }
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page.waitForURL(/\/tables\/[^/]+\/content/);
+  return tableIdFromUrl(page);
+}
+
 /** Returns the view id, saving the table content as a view through the UI if missing. */
 export async function ensureView(page: Page, projectId: string, tableId: string, name: string): Promise<string> {
   await gotoTablesList(page, projectId);

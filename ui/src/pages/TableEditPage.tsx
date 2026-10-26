@@ -8,6 +8,7 @@ import type { Table, TableSourceKind, TableUpsertRequest } from '../types/table'
 const TABLE_TYPES: Array<{ value: TableSourceKind; label: string }> = [
   { value: 'CSV', label: 'CSV' },
   { value: 'PARQUET', label: 'Parquet files' },
+  { value: 'JSON', label: 'JSON file' },
 ];
 
 export default function TableEditPage() {
@@ -18,7 +19,7 @@ export default function TableEditPage() {
   const [description, setDescription] = useState('');
   const [type, setType] = useState<TableSourceKind>('CSV');
   const [datasourceId, setDatasourceId] = useState('');
-  const [config, setConfig] = useState({ path: '', separator: ',', firstRowAsHeader: true });
+  const [config, setConfig] = useState({ path: '', separator: ',', firstRowAsHeader: true, jsonPath: '' });
   const [datasources, setDatasources] = useState<Datasource[]>([]);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +56,7 @@ export default function TableEditPage() {
           path: table.configuration.path ?? '',
           separator: table.configuration.separator ?? ',',
           firstRowAsHeader: table.configuration.firstRowAsHeader ?? true,
+          jsonPath: table.configuration.jsonPath ?? '',
         });
       })
       .catch((err: Error) => {
@@ -93,9 +95,14 @@ export default function TableEditPage() {
             separator: config.separator || ',',
             firstRowAsHeader: config.firstRowAsHeader,
           }
-        : {
-            path: config.path.trim(),
-          },
+        : type === 'JSON'
+          ? {
+              path: config.path.trim(),
+              jsonPath: config.jsonPath.trim(),
+            }
+          : {
+              path: config.path.trim(),
+            },
     };
 
     try {
@@ -145,8 +152,15 @@ export default function TableEditPage() {
         </div>
         <div className="mb-3">
           <label className="form-label">Path</label>
-          <input className="form-control" value={config.path} onChange={e => setConfig(c => ({ ...c, path: e.target.value }))} placeholder={type === 'CSV' ? 'data/customers.csv' : 'data/customers.parquet'} />
+          <input className="form-control" value={config.path} onChange={e => setConfig(c => ({ ...c, path: e.target.value }))} placeholder={type === 'CSV' ? 'data/customers.csv' : type === 'JSON' ? 'data/orders.json' : 'data/customers.parquet'} />
         </div>
+        {type === 'JSON' && (
+          <div className="mb-3">
+            <label className="form-label">JSON path of the object array</label>
+            <input className="form-control" value={config.jsonPath} onChange={e => setConfig(c => ({ ...c, jsonPath: e.target.value }))} placeholder="$.orders" />
+            <div className="form-text">Dot-separated path to the array to expose as rows, ex: $.data.items. Leave empty when the file itself is an array of objects.</div>
+          </div>
+        )}
         {type === 'CSV' && (
           <>
             <div className="mb-3">

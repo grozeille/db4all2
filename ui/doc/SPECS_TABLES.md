@@ -26,8 +26,9 @@ When I click on "Add" button, the content of the table is replaced by a new scre
 I can provide a name and a type using a select box:
 - CSV
 - Parquet files
+- JSON file
 
-For the MVP, only CSV and Parquet files are available in this selector.
+For the MVP, only CSV, Parquet and JSON files are available in this selector.
 
 Excel and PostgreSQL mappings are postponed to a later version.
 
@@ -46,6 +47,15 @@ When "save", it will call the API POST /projects/{project_id}/tables which will 
 When the user click on "Configure" button in the table view, it displays the same screen but can't change the type and data-source, but can change the name, the fields of the "configuration" section.
 
 More details about datasource types and upload policy are defined in SPECS_DATASOURCES.md.
+
+### Map JSON file to a table
+
+Same as CSV, but the configuration section is different:
+- Path (textbox) Ex: data/orders.json
+- JSON path of the object array (textbox, optional) Ex: $.orders
+
+When the JSON path is empty, the file itself must be an array of objects (or newline-delimited JSON).
+Otherwise the given path designates the nested array to expose as rows.
 
 ### Map Excel file to a table
 
