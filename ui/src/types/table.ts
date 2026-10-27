@@ -1,9 +1,10 @@
-export type TableSourceKind = 'CSV' | 'PARQUET';
+export type TableSourceKind = 'CSV' | 'PARQUET' | 'JSON';
 
 export type TableConfiguration = {
   path: string;
   separator?: string;
   firstRowAsHeader?: boolean;
+  jsonPath?: string;
 };
 
 export type QueryConditionOperator =

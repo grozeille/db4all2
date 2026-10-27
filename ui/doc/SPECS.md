@@ -55,7 +55,7 @@ The same UI and API must work in both runtime modes.
 DuckDB is the execution engine used to read files, query remote sources, build transformations, and materialize caches.
 
 DuckDB is used for:
-- reading CSV, Excel, Parquet and SQL sources
+- reading CSV, Excel, Parquet, JSON and SQL sources
 - executing filters, projections, renaming and joins
 - reading cached Parquet files
 - building non-materialized views

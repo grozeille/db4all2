@@ -3,9 +3,13 @@ import * as path from 'node:path';
 import { test as pwTest, type Page } from '@playwright/test';
 import { expect } from './fixtures';
 
-/** Screenshot attached to the test output (visible in the HTML report). */
+/** Screenshot saved to the test output and attached to the HTML report. */
 export async function snap(page: Page, name: string): Promise<void> {
-  await page.screenshot({ path: pwTest.info().outputPath(`${name}.png`), fullPage: true });
+  // PNG on purpose: our flat-UI screenshots compress ~2x better as PNG than JPEG q80.
+  const fileName = `${name}.png`;
+  const filePath = pwTest.info().outputPath(fileName);
+  await page.screenshot({ path: filePath, fullPage: true });
+  await pwTest.info().attach(fileName, { path: filePath, contentType: 'image/png' });
 }
 
 /** Absolute path of the repo `sample/` folder, used as datasource root. */
@@ -143,6 +147,48 @@ export async function ensureCsvTable(
   await page.locator('form select').nth(1).selectOption({ label: datasourceName });
   await page.getByPlaceholder('data/customers.csv').fill(csvFile);
   await page.locator('form input').nth(2).fill(';');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page.waitForURL(/\/tables\/[^/]+\/content/);
+  return tableIdFromUrl(page);
+}
+
+/** Returns the table id, creating the JSON table through the UI if missing. */
+export async function ensureJsonTable(
+  page: Page,
+  projectId: string,
+  name: string,
+  jsonFile: string,
+  jsonPath: string,
+  datasourceName: string,
+): Promise<string> {
+  await gotoTablesList(page, projectId);
+  // Narrow by name first: the card may sit on another page.
+  await page.getByPlaceholder('Search a table or a view...').fill(name);
+  const card = listCard(page, name, 'Table');
+  const found = await card
+    .first()
+    .waitFor({ state: 'visible', timeout: 10_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (found) {
+    await card.first().click();
+    await page.waitForURL(/\/tables\/[^/]+\/content/);
+    return tableIdFromUrl(page);
+  }
+
+  await page.goto(`/projects/${projectId}/tables/new`);
+  // Form labels have no associated <label for>, locate fields by order/type.
+  await page.locator('form select').nth(0).selectOption({ label: 'JSON file' });
+  await page.locator('form input').nth(0).fill(name);
+  await page.locator('form select').nth(1).selectOption({ label: datasourceName });
+  await page.getByPlaceholder('data/orders.json').fill(jsonFile);
+  if (jsonPath) {
+    await page.getByPlaceholder('$.orders').fill(jsonPath);
+  }
+  // Capture the filled JSON configuration form before saving.
+  await snap(page, 'table-new-json-form');
   await page.getByRole('button', { name: 'Save' }).click();
   await page.waitForURL(/\/tables\/[^/]+\/content/);
   return tableIdFromUrl(page);
