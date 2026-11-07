@@ -5,8 +5,11 @@ import tools.jackson.databind.ObjectMapper;
 import fr.grozeille.db4all.api.dto.ConnectionTestResponse;
 import fr.grozeille.db4all.api.dto.DatasourceCreationRequest;
 import fr.grozeille.db4all.api.dto.DatasourceDto;
+import fr.grozeille.db4all.api.dto.DatasourceScanRequest;
+import fr.grozeille.db4all.api.dto.DatasourceScanResponse;
 import fr.grozeille.db4all.api.dto.DatasourceUpdateRequest;
 import fr.grozeille.db4all.api.dto.LocalFilesystemDatasourceConfigurationDto;
+import fr.grozeille.db4all.api.dto.ScanItemDto;
 import fr.grozeille.db4all.api.exceptions.DatasourceNotFoundException;
 import fr.grozeille.db4all.api.model.Datasource;
 import fr.grozeille.db4all.api.model.DatasourceType;
@@ -21,7 +24,9 @@ import org.springframework.util.StringUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -105,6 +110,80 @@ public class DatasourceService {
                 .success(true)
                 .message("Directory is reachable: " + rootPath)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public DatasourceScanResponse scan(String projectId,
+                                       String datasourceId,
+                                       DatasourceScanRequest request,
+                                       Authentication authentication) {
+        projectAccessService.checkCanAdministrateProject(projectId, authentication);
+        Datasource datasource = getEntityById(projectId, datasourceId);
+        if (datasource.getType() != DatasourceType.LOCAL_FILESYSTEM) {
+            throw new IllegalArgumentException("Only LOCAL_FILESYSTEM datasources are supported in the current MVP.");
+        }
+        if (request == null || request.getScanType() == null) {
+            throw new IllegalArgumentException("Scan type is required.");
+        }
+        Path file = resolveFilePath(datasource, request.getFilePath());
+        return switch (request.getScanType()) {
+            case EXCEL_SHEETS -> DatasourceScanResponse.builder()
+                    .items(TableExcelSource.listSheets(file).stream()
+                            .map(sheet -> ScanItemDto.builder()
+                                    .id(sheet.name())
+                                    .label(sheet.name())
+                                    .itemType("SHEET")
+                                    .metadata(Map.of(
+                                            "index", sheet.index(),
+                                            "hidden", sheet.hidden(),
+                                            "rows", sheet.rows()))
+                                    .build())
+                            .toList())
+                    .build();
+            case EXCEL_NAMED_RANGES -> DatasourceScanResponse.builder()
+                    .items(TableExcelSource.listNamedRanges(file).stream()
+                            .map(range -> {
+                                Map<String, Object> metadata = new LinkedHashMap<>();
+                                metadata.put("formula", range.formula());
+                                if (range.sheetName() != null) {
+                                    metadata.put("sheetName", range.sheetName());
+                                }
+                                return ScanItemDto.builder()
+                                        .id(range.name())
+                                        .label(range.name())
+                                        .itemType("NAMED_RANGE")
+                                        .metadata(metadata)
+                                        .build();
+                            })
+                            .toList())
+                    .build();
+            default -> throw new IllegalArgumentException(
+                    "Scan type " + request.getScanType() + " is not supported in the current MVP.");
+        };
+    }
+
+    @Transactional(readOnly = true)
+    public Path resolveFilePath(Datasource datasource, String relativePath) {
+        LocalFilesystemDatasourceConfigurationDto configuration = getLocalFilesystemConfiguration(datasource);
+        Path root = Paths.get(configuration.getRootPath()).toAbsolutePath().normalize();
+        if (!Files.exists(root) || !Files.isDirectory(root)) {
+            throw new IllegalArgumentException("Datasource rootPath must point to an existing directory.");
+        }
+        if (!StringUtils.hasText(relativePath)) {
+            throw new IllegalArgumentException("File path is required.");
+        }
+        String trimmedPath = relativePath.trim();
+        if (trimmedPath.contains("*") || trimmedPath.contains("?") || trimmedPath.contains("[")) {
+            throw new IllegalArgumentException("File path must point to a single file, wildcards are not supported.");
+        }
+        Path candidate = root.resolve(trimmedPath).normalize();
+        if (!candidate.startsWith(root)) {
+            throw new IllegalArgumentException("File path must stay within the datasource root.");
+        }
+        if (!Files.isRegularFile(candidate)) {
+            throw new IllegalArgumentException("File does not exist: " + trimmedPath);
+        }
+        return candidate;
     }
 
     @Transactional(readOnly = true)

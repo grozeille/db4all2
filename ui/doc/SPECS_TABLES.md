@@ -27,10 +27,11 @@ I can provide a name and a type using a select box:
 - CSV
 - Parquet files
 - JSON file
+- Excel file
 
-For the MVP, only CSV, Parquet and JSON files are available in this selector.
+For the MVP, only CSV, Parquet, JSON and Excel files are available in this selector.
 
-Excel and PostgreSQL mappings are postponed to a later version.
+PostgreSQL mappings are postponed to a later version.
 
 When I select CSV, I must choose a datasource from the list of datasources configured for the project.
 
@@ -59,9 +60,17 @@ Otherwise the given path designates the nested array to expose as rows.
 
 ### Map Excel file to a table
 
-Same as CSV, but the configuration section is different.
-There's a button "scan" which will call the API POST /project/{project_id}/datasources/{name}/do-scan which will returns a list of tables/tabs of the excel file.
-The user must then select a tab/table using a select box.
+Same as CSV, but the configuration section is different:
+- Path (textbox) Ex: data/workbook.xlsx, pointing to a single file (no wildcards)
+- "Scan file" button, calling the API POST /api/v2/projects/{project_id}/datasources/{datasource_id}/scan
+  with scan types EXCEL_SHEETS and EXCEL_NAMED_RANGES
+- Selection mode (select box): Sheet, Named range, or Custom range
+- Sheet (select box) listing the scanned sheets, defaulting to the first sheet
+- Named range (select box) listing the scanned named ranges
+- Range (textbox, custom mode only) Ex: A1:D10 or Sheet2!A1:D10
+- First row as header (checkbox)
+
+The user picks one selection mode: a whole sheet, a named range, or a custom range.
 
 ### Configure a PostgreSQL table to a table
 

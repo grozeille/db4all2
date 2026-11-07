@@ -194,6 +194,59 @@ export async function ensureJsonTable(
   return tableIdFromUrl(page);
 }
 
+export type ExcelSelectionMode = 'SHEET' | 'NAMED_RANGE' | 'CUSTOM_RANGE';
+
+/** Returns the table id, creating the Excel table through the UI if missing. */
+export async function ensureExcelTable(
+  page: Page,
+  projectId: string,
+  name: string,
+  xlsxFile: string,
+  mode: ExcelSelectionMode,
+  selection: string,
+  datasourceName: string,
+): Promise<string> {
+  await gotoTablesList(page, projectId);
+  // Narrow by name first: the card may sit on another page.
+  await page.getByPlaceholder('Search a table or a view...').fill(name);
+  const card = listCard(page, name, 'Table');
+  const found = await card
+    .first()
+    .waitFor({ state: 'visible', timeout: 10_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (found) {
+    await card.first().click();
+    await page.waitForURL(/\/tables\/[^/]+\/content/);
+    return tableIdFromUrl(page);
+  }
+
+  await page.goto(`/projects/${projectId}/tables/new`);
+  // Form labels have no associated <label for>, locate fields by order/type.
+  await page.locator('form select').nth(0).selectOption({ label: 'Excel file' });
+  await page.locator('form input').nth(0).fill(name);
+  await page.locator('form select').nth(1).selectOption({ label: datasourceName });
+  await page.getByPlaceholder('data/workbook.xlsx').fill(xlsxFile);
+  await page.getByTestId('excel-scan').click();
+  // Only the "First sheet" option exists before the scan completes.
+  await expect(page.getByTestId('excel-sheet').locator('option')).not.toHaveCount(1, { timeout: 15_000 });
+  await page.getByTestId('excel-mode').selectOption(mode);
+  if (mode === 'SHEET') {
+    await page.getByTestId('excel-sheet').selectOption({ label: selection });
+  } else if (mode === 'NAMED_RANGE') {
+    await page.getByTestId('excel-named-range').selectOption({ label: selection });
+  } else {
+    await page.getByTestId('excel-range').fill(selection);
+  }
+  // Capture the filled Excel configuration form before saving.
+  await snap(page, 'table-new-excel-form');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page.waitForURL(/\/tables\/[^/]+\/content/);
+  return tableIdFromUrl(page);
+}
+
 /** Returns the view id, saving the table content as a view through the UI if missing. */
 export async function ensureView(page: Page, projectId: string, tableId: string, name: string): Promise<string> {
   await gotoTablesList(page, projectId);

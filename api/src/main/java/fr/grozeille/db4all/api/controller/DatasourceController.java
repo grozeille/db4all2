@@ -3,6 +3,8 @@ package fr.grozeille.db4all.api.controller;
 import fr.grozeille.db4all.api.dto.ConnectionTestResponse;
 import fr.grozeille.db4all.api.dto.DatasourceCreationRequest;
 import fr.grozeille.db4all.api.dto.DatasourceDto;
+import fr.grozeille.db4all.api.dto.DatasourceScanRequest;
+import fr.grozeille.db4all.api.dto.DatasourceScanResponse;
 import fr.grozeille.db4all.api.dto.DatasourceUpdateRequest;
 import fr.grozeille.db4all.api.dto.ErrorResponse;
 import fr.grozeille.db4all.api.service.DatasourceService;
@@ -131,5 +133,22 @@ public class DatasourceController {
                                                                  @PathVariable String datasourceId,
                                                                  Authentication authentication) {
         return ResponseEntity.ok(datasourceService.testConnection(projectId, datasourceId, authentication));
+    }
+
+    @Operation(summary = "Scan datasource content", description = "Scans a datasource for selectable content, such as sheets or named ranges in an Excel file.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Scan completed.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DatasourceScanResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized.", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Datasource not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/{datasourceId}/scan")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<DatasourceScanResponse> scan(@PathVariable String projectId,
+                                                       @PathVariable String datasourceId,
+                                                       @RequestBody DatasourceScanRequest request,
+                                                       Authentication authentication) {
+        return ResponseEntity.ok(datasourceService.scan(projectId, datasourceId, request, authentication));
     }
 }
