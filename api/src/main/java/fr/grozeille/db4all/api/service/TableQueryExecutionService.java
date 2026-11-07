@@ -10,6 +10,7 @@ import fr.grozeille.db4all.api.dto.TableQueryResponse;
 import fr.grozeille.db4all.api.model.Datasource;
 import fr.grozeille.db4all.api.model.DatasourceType;
 import fr.grozeille.db4all.api.model.Table;
+import fr.grozeille.db4all.api.model.TableSourceKind;
 import fr.grozeille.db4all.api.repository.DatasourceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,9 +66,14 @@ public class TableQueryExecutionService {
         projectAccessService.checkCanAdministrateProject(projectId, authentication);
         Table table = tableService.getEntityById(tableId, projectId);
         Datasource datasource = getDatasource(projectId, table.getDatasourceId());
-        PreparedSource preparedSource = prepareSource(table, datasource);
-        List<TableQuerySqlCompiler.SchemaColumn> schema = inspectSchema(preparedSource);
-        return tableQuerySqlCompiler.compile(preparedSource.sourceSql(), preparedSource.parameters(), schema, request, false).sql();
+        List<Path> tempFiles = new ArrayList<>();
+        try {
+            PreparedSource preparedSource = prepareSource(table, datasource, tempFiles);
+            List<TableQuerySqlCompiler.SchemaColumn> schema = inspectSchema(preparedSource);
+            return tableQuerySqlCompiler.compile(preparedSource.sourceSql(), preparedSource.parameters(), schema, request, false).sql();
+        } finally {
+            deleteTempFiles(tempFiles);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -97,7 +103,12 @@ public class TableQueryExecutionService {
                                Authentication authentication) {
         projectAccessService.checkCanAdministrateProject(projectId, authentication);
         Datasource datasource = getDatasource(projectId, rootTable.getDatasourceId());
-        return planChain(rootTable, datasource, chainQueries, false).sql();
+        List<Path> tempFiles = new ArrayList<>();
+        try {
+            return planChain(rootTable, datasource, chainQueries, false, tempFiles).sql();
+        } finally {
+            deleteTempFiles(tempFiles);
+        }
     }
 
     private TableQueryResponse execute(Table table,
@@ -111,8 +122,16 @@ public class TableQueryExecutionService {
                                             Datasource datasource,
                                             List<TableQueryRequest> chainQueries,
                                             boolean applyPagination) {
-        TableQuerySqlCompiler.QueryPlan plan = planChain(table, datasource, chainQueries, applyPagination);
+        List<Path> tempFiles = new ArrayList<>();
+        try {
+            TableQuerySqlCompiler.QueryPlan plan = planChain(table, datasource, chainQueries, applyPagination, tempFiles);
+            return executePlan(table, plan);
+        } finally {
+            deleteTempFiles(tempFiles);
+        }
+    }
 
+    private TableQueryResponse executePlan(Table table, TableQuerySqlCompiler.QueryPlan plan) {
         try (Connection connection = DriverManager.getConnection(DUCKDB_JDBC_URL);
              PreparedStatement statement = connection.prepareStatement(plan.sql())) {
             bindParameters(statement, plan.parameters());
@@ -141,11 +160,12 @@ public class TableQueryExecutionService {
     private TableQuerySqlCompiler.QueryPlan planChain(Table table,
                                                        Datasource datasource,
                                                        List<TableQueryRequest> chainQueries,
-                                                       boolean applyPagination) {
+                                                       boolean applyPagination,
+                                                       List<Path> tempFiles) {
         List<TableQueryRequest> effectiveChain = chainQueries == null || chainQueries.isEmpty()
                 ? List.of(TableQueryRequest.builder().build())
                 : chainQueries;
-        PreparedSource preparedSource = prepareSource(table, datasource);
+        PreparedSource preparedSource = prepareSource(table, datasource, tempFiles);
         String currentSql = preparedSource.sourceSql();
         List<Object> currentParameters = new ArrayList<>(preparedSource.parameters());
         List<TableQuerySqlCompiler.SchemaColumn> schema = inspectSchema(preparedSource);
@@ -174,7 +194,7 @@ public class TableQueryExecutionService {
                 .orElseThrow(() -> new IllegalArgumentException("Datasource not found: " + datasourceId));
     }
 
-    private PreparedSource prepareSource(Table table, Datasource datasource) {
+    private PreparedSource prepareSource(Table table, Datasource datasource, List<Path> tempFiles) {
         if (datasource.getType() != DatasourceType.LOCAL_FILESYSTEM) {
             throw new IllegalArgumentException("Only LOCAL_FILESYSTEM datasources are supported in the current MVP.");
         }
@@ -183,14 +203,32 @@ public class TableQueryExecutionService {
         if (!StringUtils.hasText(relativePath)) {
             throw new IllegalArgumentException("Table configuration path is required.");
         }
+        if (table.getSourceKind() == TableSourceKind.EXCEL) {
+            Path excelFile = datasourceService.resolveFilePath(datasource, relativePath);
+            TableExcelSource.ExcelSelection selection = TableExcelSource.parseSelection(configuration);
+            Path csvFile = TableExcelSource.materializeToCsv(excelFile, selection);
+            tempFiles.add(csvFile);
+            return new PreparedSource(TableExcelSource.buildSourceSql(), List.of(csvFile.toString()));
+        }
         LocalFilesystemDatasourceConfigurationDto datasourceConfiguration = datasourceService.getLocalFilesystemConfiguration(datasource);
         String resolvedPath = resolveSourcePath(datasourceConfiguration.getRootPath(), relativePath);
         String sourceSql = switch (table.getSourceKind()) {
             case CSV -> "SELECT * FROM read_csv_auto(?)";
             case PARQUET -> "SELECT * FROM read_parquet(?)";
             case JSON -> TableJsonSource.buildSourceSql(configuration.path("jsonPath").asText(null));
+            case EXCEL -> throw new IllegalStateException("Excel sources are materialized before DuckDB planning.");
         };
         return new PreparedSource(sourceSql, List.of(resolvedPath));
+    }
+
+    private void deleteTempFiles(List<Path> tempFiles) {
+        for (Path tempFile : tempFiles) {
+            try {
+                Files.deleteIfExists(tempFile);
+            } catch (java.io.IOException exception) {
+                log.warn("Unable to delete temporary file {}", tempFile, exception);
+            }
+        }
     }
 
     private String resolveSourcePath(String rootPath, String relativePath) {

@@ -164,10 +164,11 @@ Supported physical table source kinds:
 - CSV file or file pattern
 - Parquet files
 - JSON file, optionally with a JSON path pointing to an array of objects
+- Excel workbook: whole sheet, named range or explicit range
 
-For the MVP, only CSV, Parquet and JSON mapped from a Local filesystem datasource are in scope.
+For the MVP, only CSV, Parquet, JSON and Excel mapped from a Local filesystem datasource are in scope.
 
-Excel workbook support and PostgreSQL table support remain future work.
+PostgreSQL table support remains future work.
 
 Future support may include Iceberg, but it is not part of MVP.
 
@@ -214,6 +215,10 @@ Optional fields:
 - first row as header
 
 The UI must provide a scan action to list sheets or named ranges.
+
+Only one selection mode is used at a time: a named range cannot be combined with a sheet name
+or an explicit range, since it already designates its own sheet and area. An explicit range may
+optionally be scoped to a sheet (ex: `Sheet2!A1:D10`); otherwise it applies to the selected sheet.
 
 For CIFS-backed Excel files, the scan is performed on the latest local copied version of the file.
 

@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import type { Page } from '@playwright/test';
 import { Given, When, Then, expect } from './fixtures';
-import { SAMPLES_DIR, countCsvWhere, csvColumnIndex, ensureCsvTable, ensureJsonTable, snap, world } from './support';
+import { SAMPLES_DIR, countCsvWhere, csvColumnIndex, ensureCsvTable, ensureExcelTable, ensureJsonTable, snap, world } from './support';
 
 const gridRows = '.ag-center-cols-container .ag-row';
 
@@ -57,6 +57,38 @@ When(
   async ({ page }, name: string, jsonFile: string, datasourceName: string) => {
     if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
     world.tableId = await ensureJsonTable(page, world.projectId, name, jsonFile, '', datasourceName);
+  },
+);
+
+Given(
+  'the Excel table {string} exists from {string} sheet {string} in datasource {string}',
+  async ({ page }, name: string, xlsxFile: string, sheet: string, datasourceName: string) => {
+    if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
+    world.tableId = await ensureExcelTable(page, world.projectId, name, xlsxFile, 'SHEET', sheet, datasourceName);
+  },
+);
+
+When(
+  'I create an Excel table named {string} from {string} sheet {string} in datasource {string}',
+  async ({ page }, name: string, xlsxFile: string, sheet: string, datasourceName: string) => {
+    if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
+    world.tableId = await ensureExcelTable(page, world.projectId, name, xlsxFile, 'SHEET', sheet, datasourceName);
+  },
+);
+
+When(
+  'I create an Excel table named {string} from {string} named range {string} in datasource {string}',
+  async ({ page }, name: string, xlsxFile: string, namedRange: string, datasourceName: string) => {
+    if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
+    world.tableId = await ensureExcelTable(page, world.projectId, name, xlsxFile, 'NAMED_RANGE', namedRange, datasourceName);
+  },
+);
+
+When(
+  'I create an Excel table named {string} from {string} range {string} in datasource {string}',
+  async ({ page }, name: string, xlsxFile: string, range: string, datasourceName: string) => {
+    if (!world.projectId) throw new Error('No project in world: add a "the project ... exists" step first.');
+    world.tableId = await ensureExcelTable(page, world.projectId, name, xlsxFile, 'CUSTOM_RANGE', range, datasourceName);
   },
 );
 

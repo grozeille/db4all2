@@ -1,4 +1,9 @@
-import type { Datasource, DatasourceUpsertRequest } from '../types/datasource';
+import type {
+  Datasource,
+  DatasourceScanRequest,
+  DatasourceScanResponse,
+  DatasourceUpsertRequest,
+} from '../types/datasource';
 import { getAuthHeaders } from './utils';
 
 const API_URL = '/api/v2/projects';
@@ -51,6 +56,22 @@ export async function deleteDatasource(projectId: string, datasourceId: string):
   if (!response.ok) {
     throw await readError(response, `Unable to delete datasource (${response.status})`);
   }
+}
+
+export async function scanDatasource(
+  projectId: string,
+  datasourceId: string,
+  request: DatasourceScanRequest,
+): Promise<DatasourceScanResponse> {
+  const response = await fetch(`${API_URL}/${projectId}/datasources/${datasourceId}/scan`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(request),
+  });
+  if (!response.ok) {
+    throw await readError(response, `Unable to scan datasource (${response.status})`);
+  }
+  return response.json();
 }
 
 export async function testDatasourceConnection(projectId: string, datasourceId: string): Promise<string> {

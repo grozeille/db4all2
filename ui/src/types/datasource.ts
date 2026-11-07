@@ -20,3 +20,21 @@ export type DatasourceUpsertRequest = {
   readOnly: boolean;
   configuration: LocalFilesystemDatasourceConfiguration;
 };
+
+export type DatasourceScanType = 'EXCEL_SHEETS' | 'EXCEL_NAMED_RANGES';
+
+export type DatasourceScanRequest = {
+  filePath: string;
+  scanType: DatasourceScanType;
+};
+
+export type ScanItem = {
+  id: string;
+  label: string;
+  itemType: string;
+  metadata?: Record<string, unknown>;
+};
+
+export type DatasourceScanResponse = {
+  items: ScanItem[];
+};
