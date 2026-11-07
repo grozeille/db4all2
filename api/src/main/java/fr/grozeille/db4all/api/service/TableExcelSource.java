@@ -373,7 +373,10 @@ public final class TableExcelSource {
 
     private static Workbook openWorkbook(Path excelFile) {
         try {
-            return WorkbookFactory.create(excelFile.toFile());
+            // Read-only is mandatory: the default read-write open saves the package back on
+            // close, which rewrites (and briefly truncates) the user's file and corrupts
+            // concurrent reads of the same workbook with EOF/ZLIB errors.
+            return WorkbookFactory.create(excelFile.toFile(), null, true);
         } catch (Exception exception) {
             String reason = exception.getMessage() != null ? exception.getMessage() : exception.toString();
             throw new IllegalArgumentException(

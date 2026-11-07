@@ -21,7 +21,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -267,6 +272,40 @@ class TableExcelSourceTest {
         assertEquals("TopCustomers", ranges.get(0).name());
         assertEquals("Orders!$A$1:$A$2", ranges.get(0).formula());
         assertEquals("Orders", ranges.get(0).sheetName());
+    }
+
+    @Test
+    void shouldSupportConcurrentReadsWithoutTouchingTheSourceFile() throws Exception {
+        Path file = writeWorkbook("concurrent.xlsx", workbook -> {
+            Sheet sheet = workbook.createSheet("Data");
+            row(sheet, 0, "id", "name");
+            row(sheet, 1, 1, "camille");
+        });
+        byte[] before = Files.readAllBytes(file);
+
+        int threads = 8;
+        int iterations = 25;
+        ExecutorService pool = Executors.newFixedThreadPool(threads);
+        try {
+            List<Future<?>> futures = new ArrayList<>();
+            for (int task = 0; task < threads; task++) {
+                futures.add(pool.submit(() -> {
+                    for (int i = 0; i < iterations; i++) {
+                        assertEquals(1, TableExcelSource.listSheets(file).size());
+                        Path csv = TableExcelSource.materializeToCsv(file, TableExcelSource.parseSelection(config()));
+                        Files.deleteIfExists(csv);
+                    }
+                    return null;
+                }));
+            }
+            for (Future<?> future : futures) {
+                future.get(120, TimeUnit.SECONDS);
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+
+        assertTrue(Arrays.equals(before, Files.readAllBytes(file)), "reads must leave the source workbook untouched");
     }
 
     @Test
